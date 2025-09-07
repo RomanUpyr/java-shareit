@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -8,16 +8,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Модель пользователя системы.
- * Содержит информацию о пользователе, который может владеть вещами и брать их в аренду.
+ * Используется для обмена данными между клиентом и сервером
+ * (для передачи данных о пользователе).
+ * Отделяет модель данных от представления, возвращаемого через API.
+ * Создадим его для целостного представления модели, чтобы у каждой сущности был DTO.
+ * Валидация в принципе происходит на уровне User, на всякий случай сюда тоже добавим,
+ * потом уберем, если что.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserDto {
     /**
-     * Уникальный идентификатор пользователя.
-     * Генерируется автоматически при создании.
+     * Уникальный идентификатор пользователя
      */
     @NotBlank(message = "User d не должен быть пустым")
     private Long id;

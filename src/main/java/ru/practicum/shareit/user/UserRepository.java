@@ -1,5 +1,7 @@
 package ru.practicum.shareit.user;
 
+import ru.practicum.shareit.user.model.User;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +11,7 @@ import java.util.Optional;
 public interface UserRepository {
     /**
      * Сохраняет нового пользователя
+     *
      * @param user пользователь для сохранения
      * @return сохраненный пользователь с присвоенным id
      */
@@ -16,6 +19,7 @@ public interface UserRepository {
 
     /**
      * Находит пользователя по идентификатору
+     *
      * @param id идентификатор пользователя
      * @return Optional с пользователем, если найден
      */
@@ -23,12 +27,14 @@ public interface UserRepository {
 
     /**
      * Возвращает всех пользователей
+     *
      * @return список всех пользователей
      */
     List<User> findAll();
 
     /**
      * Обновляет данные пользователя
+     *
      * @param user пользователь с обновленными данными
      * @return обновленный пользователь
      */
@@ -36,6 +42,7 @@ public interface UserRepository {
 
     /**
      * Удаляет пользователя по идентификатору
+     *
      * @param id идентификатор пользователя для удаления
      */
     void deleteById(Long id);

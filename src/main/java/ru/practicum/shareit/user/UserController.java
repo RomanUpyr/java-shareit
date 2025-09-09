@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -18,17 +19,19 @@ public class UserController {
 
     /**
      * Создает нового пользователя.
+     *
      * @param userDto данные пользователя из тела запроса.
      * @return созданный пользователь.
      */
     @PostMapping
-    public UserDto create(@RequestBody UserDto userDto) {
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
         return userService.create(userDto);
     }
 
 
     /**
      * Возвращает пользователя по идентификатору.
+     *
      * @param id идентификатор пользователя из пути URL.
      * @return пользователь.
      */
@@ -39,6 +42,7 @@ public class UserController {
 
     /**
      * Возвращает всех пользователей.
+     *
      * @return список всех пользователей.
      */
     @GetMapping
@@ -48,17 +52,19 @@ public class UserController {
 
     /**
      * Обновляет данные пользователя.
-     * @param id идентификатор пользователя для обновления.
+     *
+     * @param id      идентификатор пользователя для обновления.
      * @param userDto данные для обновления.
      * @return обновленный пользователь.
      */
     @PatchMapping("/{id}")
-    public UserDto update(@PathVariable Long id, @RequestBody UserDto userDto) {
+    public UserDto update(@Valid @PathVariable Long id, @RequestBody UserDto userDto) {
         return userService.update(id, userDto);
     }
 
     /**
      * Удаляет пользователя.
+     *
      * @param id идентификатор пользователя для удаления.
      */
     @DeleteMapping("/{id}")

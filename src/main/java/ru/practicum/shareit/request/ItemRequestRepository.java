@@ -1,6 +1,6 @@
 package ru.practicum.shareit.request;
 
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +31,7 @@ public interface ItemRequestRepository {
 
     /**
      * Находит все запросы, созданные другими пользователями.
+     *
      * @param userId идентификатор пользователя, который не должен быть автором.
      * @return список запросов других пользователей.
      */

@@ -1,11 +1,15 @@
 package ru.practicum.shareit.request;
 
+import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.request.model.ItemRequest;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * In-memory реализация репозитория запросов вещей.
  */
+@Repository
 public class InMemoryItemRequestRepository implements ItemRequestRepository {
     private final Map<Long, ItemRequest> requests = new HashMap<>();
     private long nextId = 1L;

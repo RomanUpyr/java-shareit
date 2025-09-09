@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.dto.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -9,6 +11,7 @@ import java.util.stream.Collectors;
 /**
  * In-memory реализация репозитория бронирований.
  */
+@Repository
 public class InMemoryBookingRepository implements BookingRepository {
     // Хранилище вещей: id -> Booking>
     private final Map<Long, Booking> bookings = new HashMap<>();

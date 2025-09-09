@@ -1,10 +1,12 @@
 package ru.practicum.shareit.booking;
 
 import ru.practicum.shareit.booking.dto.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
 /**
  * Интерфейс репозитория для работы с бронированиями.
  */

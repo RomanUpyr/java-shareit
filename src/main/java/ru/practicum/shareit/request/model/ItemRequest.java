@@ -1,13 +1,11 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.model;
 
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
@@ -22,7 +20,7 @@ public class ItemRequest {
     /**
      * Уникальный идентификатор запроса.
      */
-    @NotBlank(message = "ItemRequest Id не должен быть пустым")
+    @NotNull(message = "ItemRequest Id не должен быть null")
     private Long id;
 
     /**
@@ -37,7 +35,6 @@ public class ItemRequest {
      * Много запросов могут быть от одного пользователя(связь many-to-one).
      */
     @NotNull(message = "ItemRequest requestor не должен быть null")
-    @NotBlank(message = "ItemRequest requestor не должен быть пустым")
     private Long requestorId;
 
     /**

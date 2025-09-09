@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class BookingServiceImpl implements BookingService{
+public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -96,7 +97,7 @@ public class BookingServiceImpl implements BookingService{
 
         return bookings.stream()
                 .map(booking -> BookingMapper.toBookingDto(booking, true))
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     /**
@@ -179,6 +180,7 @@ public class BookingServiceImpl implements BookingService{
         booking.setStatus(BookingStatus.CANCELED);
         return BookingMapper.toBookingDto(bookingRepository.update(booking));
     }
+
     /**
      * Удаляет бронирование.
      */
@@ -206,6 +208,9 @@ public class BookingServiceImpl implements BookingService{
             case "REJECTED":
                 return isBooker ? bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED) :
                         bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.REJECTED);
+            case "APPROVED":
+                return isBooker ? bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.APPROVED) :
+                        bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.APPROVED);
             default:
                 throw new ValidationException("Unknown state: " + state);
         }

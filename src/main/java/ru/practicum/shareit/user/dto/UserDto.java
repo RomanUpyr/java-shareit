@@ -22,7 +22,6 @@ public class UserDto {
     /**
      * Уникальный идентификатор пользователя
      */
-    @NotBlank(message = "User d не должен быть пустым")
     private Long id;
 
     /**

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
@@ -9,7 +10,7 @@ import java.util.*;
  * Хранит данные в HashMap в памяти приложения.
  */
 @Repository
-public class InMemoryUserRepository implements UserRepository{
+public class InMemoryUserRepository implements UserRepository {
     // Хранилище пользователей: id -> User
     private final Map<Long, User> users = new HashMap<>();
     // Счетчик для генерации уникальных идентификаторов

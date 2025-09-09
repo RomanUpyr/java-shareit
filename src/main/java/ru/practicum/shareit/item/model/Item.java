@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 /**
  * Модель вещи (item) в системе шеринга, объект, который можно арендовать.
@@ -18,20 +18,18 @@ public class Item {
     /**
      * Уникальный идентификатор вещи.
      */
-    @NotBlank(message = "Item Id не должен быть пустым")
+    @NotNull(message = "Item Id не должен быть null")
     private Long id;
 
     /**
      * Краткое название вещи.
      */
-    @NotNull(message = "Item name не должен быть null")
     @NotBlank(message = "Item name не должен быть пустым")
     private String name;
 
     /**
      * Подробное описание вещи и её характеристик.
      */
-    @NotNull(message = "Item description не должен быть null")
     @NotBlank(message = "Item description не должен быть пустым")
     private String description;
 
@@ -40,7 +38,6 @@ public class Item {
      * true - доступна, false - не доступна
      */
     @NotNull(message = "Item available не должен быть null")
-    @NotBlank(message = "Item available не должен быть пустым")
     private Boolean available;
 
     /**
@@ -48,7 +45,6 @@ public class Item {
      * Много вещей могут принадлежать одному пользователю (many-to-one).
      */
     @NotNull(message = "Owner не должен быть null")
-    @NotBlank(message = "Owner не должен быть пустым")
     private User owner;
 
     /**
@@ -56,5 +52,4 @@ public class Item {
      * Может быть null, если вещь добавлена без запроса.
      */
     private ItemRequest request;
-
 }

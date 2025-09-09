@@ -6,7 +6,6 @@ import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
@@ -33,7 +32,6 @@ public class ItemRequestDto {
      * Пользователь, создавший запрос.
      */
     @NotNull(message = "ItemRequest requestor не должен быть null")
-    @NotBlank(message = "ItemRequest requestor не должен быть пустым")
     private Long requestorId;
 
     /**

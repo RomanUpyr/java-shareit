@@ -14,7 +14,7 @@ public interface BookingService {
      * Создает новое бронирование.
      *
      * @param bookingDto DTO с данными для создания бронирования.
-     * @param bookerId         идентификатор пользователя, который бронирует.
+     * @param bookerId   идентификатор пользователя, который бронирует.
      * @return созданное бронирование в формате DTO.
      * @throws NotFoundException   если вещь или пользователь не найдены.
      * @throws ValidationException если вещь недоступна или даты некорректны.

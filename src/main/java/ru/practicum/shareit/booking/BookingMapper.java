@@ -1,18 +1,21 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
 
 /**
  * Маппер для преобразования между Entity и DTO объектов бронирования.
  */
+@Component
 public class BookingMapper {
     /**
      * Преобразует DTO бронирования в Entity для сохранения в базу данных.

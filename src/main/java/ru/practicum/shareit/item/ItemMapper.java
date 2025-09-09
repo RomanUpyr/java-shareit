@@ -1,15 +1,18 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 /**
  * Маппер для преобразования между Entity и DTO объектов вещи.
  * Обеспечивает согласованное преобразование данных между слоями.
  * Методы создадим статические, чтобы использовать маппер без создания экземпляра.
  */
+@Component
 public class ItemMapper {
     /**
      * Преобразует Entity вещи в DTO для возврата клиенту.
@@ -35,7 +38,7 @@ public class ItemMapper {
      * @return Item Entity для сохранения
      */
     public static Item toItem(ItemDto itemDto, ItemRequestRepository itemRequestRepository) {
-        return new Item(
+        Item item = new Item(
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
@@ -45,9 +48,9 @@ public class ItemMapper {
         );
 
         // Устанавливаем запрос, если указан requestId
-        if (itemDto.getRequest() != null) {
-            var itemRequest = itemRequestRepository.findById(itemDto.getRequest())
-                    .orElseThrow(() -> new NotFoundException("Item request not found with id: " + itemDto.getRequest()));
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException("Item request not found with id: " + itemDto.getRequestId()));
             item.setRequest(itemRequest);
         }
 

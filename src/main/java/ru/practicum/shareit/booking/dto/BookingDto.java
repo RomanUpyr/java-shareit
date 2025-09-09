@@ -46,7 +46,7 @@ public class BookingDto {
     /**
      * Вещь, которая бронируется.
      */
-    private ru.practicum.shareit.item.dto.ItemDto item;
+    private ItemDto item;
 
     /**
      * Статус бронирования.
@@ -56,7 +56,7 @@ public class BookingDto {
     /**
      * Пользователь, который осуществляет бронирование.
      */
-    private ru.practicum.shareit.user.dto.UserDto booker;
+    private UserDto booker;
 
     /**
      * Идентификатор пользователя, который бронирует.

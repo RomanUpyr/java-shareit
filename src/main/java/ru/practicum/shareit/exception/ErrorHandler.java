@@ -41,6 +41,15 @@ public class ErrorHandler {
     }
 
     /**
+     * Обрабатывает ConflictException и возвращает HTTP 409.
+     */
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictException(final ConflictException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    /**
      * DTO для ответа с ошибкой.
      * Содержит стандартизированную структуру для всех ошибок.
      */

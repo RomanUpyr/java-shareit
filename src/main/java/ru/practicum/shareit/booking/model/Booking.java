@@ -1,15 +1,14 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.model;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +23,7 @@ public class Booking {
     /**
      * Уникальный идентификатор бронирования.
      */
-    @NotBlank(message = "Booking Id не должен быть пустым")
+    @NotNull(message = "Booking Id не должен быть null")
     private Long id;
 
     /**
@@ -44,7 +43,6 @@ public class Booking {
     /**
      * Вещь, которая бронируется.
      */
-    @NotBlank(message = "Booking item не должен быть пустым")
     @NotNull(message = "Booking item не может быть null")
     private Item item;
 
@@ -57,7 +55,6 @@ public class Booking {
      * Статус бронирования.
      * Определяет текущее состояние запроса на бронирование.
      */
-    @NotBlank(message = "Booking status не должен быть пустым")
     @NotNull(message = "Booking status не может быть null")
     private BookingStatus status;
 

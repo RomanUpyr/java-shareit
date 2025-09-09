@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 public interface UserService {
     /**
      * Создает нового пользователя
+     *
      * @param userDto DTO с данными пользователя
      * @return созданный пользователь в формате DTO
      */
@@ -17,6 +19,7 @@ public interface UserService {
 
     /**
      * Находит пользователя по идентификатору
+     *
      * @param id идентификатор пользователя
      * @return пользователь в формате DTO
      * @throws NotFoundException если пользователь не найден
@@ -25,13 +28,15 @@ public interface UserService {
 
     /**
      * Возвращает всех пользователей
+     *
      * @return список всех пользователей в формате DTO
      */
     List<UserDto> getAll();
 
     /**
      * Обновляет данные пользователя
-     * @param id идентификатор пользователя для обновления
+     *
+     * @param id      идентификатор пользователя для обновления
      * @param userDto DTO с обновленными данными
      * @return обновленный пользователь в формате DTO
      * @throws NotFoundException если пользователь не найден
@@ -40,6 +45,7 @@ public interface UserService {
 
     /**
      * Удаляет пользователя
+     *
      * @param id идентификатор пользователя для удаления
      */
     void delete(Long id);

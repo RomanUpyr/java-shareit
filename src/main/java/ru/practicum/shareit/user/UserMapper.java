@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -16,7 +17,7 @@ public class UserMapper {
      * @param user Entity пользователя из базы данных
      * @return UserDto объект для передачи клиенту
      */
-    public static UserDto toUserDto(User user) {
+    public UserDto toUserDto(User user) {
         return new UserDto(
                 user.getId(),
                 user.getName(),
@@ -30,7 +31,7 @@ public class UserMapper {
      * @param userDto DTO пользователя от клиента
      * @return User Entity для сохранения
      */
-    public static User toUser(UserDto userDto) {
+    public User toUser(UserDto userDto) {
         return new User(
                 userDto.getId(),
                 userDto.getName(),

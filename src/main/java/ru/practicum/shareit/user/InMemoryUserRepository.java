@@ -21,7 +21,9 @@ public class InMemoryUserRepository implements UserRepository {
      */
     @Override
     public User save(User user) {
-        user.setId(nextId++);
+        if (user.getId() == null) {
+            user.setId(nextId++);
+        }
         users.put(user.getId(), user);
         return user;
     }
@@ -58,5 +60,43 @@ public class InMemoryUserRepository implements UserRepository {
     public void deleteById(Long id) {
         users.remove(id);
     }
+
+    /**
+     * Проверяет существование пользователя с указанным email
+     */
+    @Override
+    public boolean existsByEmail(String email) {
+        return users.values().stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    /**
+     * Находит пользователя по email
+     */
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return users.values().stream()
+                .filter(user -> user.getEmail().equals(email))
+                .findFirst();
+    }
+
+    /**
+     * Проверяет существование пользователя с указанным id
+     */
+    @Override
+    public boolean existsById(Long id) {
+        return users.containsKey(id);
+    }
+
+    /**
+     * Находит всех пользователей с указанным именем
+     */
+    @Override
+    public List<User> findByName(String name) {
+        return users.values().stream()
+                .filter(user -> user.getName().equals(name))
+                .toList();
+    }
+
 
 }

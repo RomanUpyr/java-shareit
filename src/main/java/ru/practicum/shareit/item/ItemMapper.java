@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -13,14 +14,17 @@ import ru.practicum.shareit.request.model.ItemRequest;
  * Методы создадим статические, чтобы использовать маппер без создания экземпляра.
  */
 @Component
+@RequiredArgsConstructor
 public class ItemMapper {
+    private final ItemRequestRepository itemRequestRepository;
+
     /**
      * Преобразует Entity вещи в DTO для возврата клиенту.
      *
      * @param item Entity вещи из базы данных
      * @return ItemDto объект для передачи клиенту
      */
-    public static ItemDto toItemDto(Item item) {
+    public ItemDto toItemDto(Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -37,7 +41,7 @@ public class ItemMapper {
      * @param itemDto DTO вещи от клиента
      * @return Item Entity для сохранения
      */
-    public static Item toItem(ItemDto itemDto, ItemRequestRepository itemRequestRepository) {
+    public Item toItem(ItemDto itemDto) {
         Item item = new Item(
                 itemDto.getId(),
                 itemDto.getName(),

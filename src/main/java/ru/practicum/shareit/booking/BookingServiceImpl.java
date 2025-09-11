@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.strategy.BookingStateFetchStrategy;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +27,18 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingMapper bookingMapper;
+
+    /**
+     * Карта стратегий для пользователя.
+     */
+    private final Map<String, BookingStateFetchStrategy> bookerStrategies;
+
+    /**
+     * Карта стратегий для владельца.
+     */
+    private final Map<String, BookingStateFetchStrategy> ownerStrategies;
+
 
     /**
      * Создает бронирование с проверками:
@@ -35,11 +49,11 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + bookerId));
 
-        Booking booking = BookingMapper.toBooking(bookingDto, bookerId, itemRepository, userRepository);
+        Booking booking = bookingMapper.toBooking(bookingDto, bookerId);
 
         validateBooking(booking, bookerId);
 
-        return BookingMapper.toBookingDto(bookingRepository.save(booking));
+        return bookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
     /**
@@ -47,8 +61,7 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public BookingDto approve(Long bookingId, Long ownerId, boolean approved) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+        Booking booking = getBookingById(bookingId);
 
         // Проверяем что пользователь является владельцем вещи
         if (!booking.getItem().getOwner().getId().equals(ownerId)) {
@@ -63,7 +76,7 @@ public class BookingServiceImpl implements BookingService {
         // Устанавливаем новый статус
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
 
-        return BookingMapper.toBookingDto(bookingRepository.update(booking));
+        return bookingMapper.toBookingDto(bookingRepository.update(booking));
     }
 
     /**
@@ -71,8 +84,7 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public BookingDto getById(Long bookingId, Long userId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+        Booking booking = getBookingById(bookingId);
 
         // Проверяем права доступа: автор бронирования или владелец вещи
         if (!booking.getBooker().getId().equals(userId) &&
@@ -80,7 +92,15 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Access denied to booking");
         }
 
-        return BookingMapper.toBookingDto(booking);
+        return bookingMapper.toBookingDto(booking);
+    }
+
+    /**
+     * Получает бронирование по ID с проверкой существования
+     */
+    private Booking getBookingById(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
     }
 
     /**
@@ -89,14 +109,21 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getByBookerId(Long bookerId, String state) {
         // Проверяем существование пользователя
-        userRepository.findById(bookerId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + bookerId));
+        if (!userRepository.existsById(bookerId)) {
+            throw new NotFoundException("User not found with id: " + bookerId);
+        }
+        // Получаем стратегию по состоянию
+        BookingStateFetchStrategy strategy = bookerStrategies.get(state.toUpperCase());
 
-        LocalDateTime now = LocalDateTime.now();
-        List<Booking> bookings = getBookingsByState(bookerId, state, now, true);
+        if (strategy == null) {
+            throw new ValidationException("Unknown state: " + state);
+        }
+
+        // Используем стратегию для получения бронирований
+        List<Booking> bookings = strategy.findBookings(bookerId, bookingRepository);
 
         return bookings.stream()
-                .map(booking -> BookingMapper.toBookingDto(booking, true))
+                .map(booking -> bookingMapper.toBookingDto(booking, true))
                 .collect(Collectors.toList());
     }
 
@@ -106,14 +133,24 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getByOwnerId(Long ownerId, String state) {
         // Проверяем существование пользователя
-        userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + ownerId));
+        if (!userRepository.existsById(ownerId)) {
+            throw new NotFoundException("User not found with id: " + ownerId);
+        }
 
         LocalDateTime now = LocalDateTime.now();
-        List<Booking> bookings = getBookingsByState(ownerId, state, now, false);
+
+        // Получаем стратегию по состоянию
+        BookingStateFetchStrategy strategy = ownerStrategies.get(state.toUpperCase());
+
+        if (strategy == null) {
+            throw new ValidationException("Unknown state: " + state);
+        }
+
+        // Используем стратегию для получения бронирований
+        List<Booking> bookings = strategy.findBookings(ownerId, bookingRepository);
 
         return bookings.stream()
-                .map(BookingMapper::toBookingDto)
+                .map(bookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
@@ -151,7 +188,7 @@ public class BookingServiceImpl implements BookingService {
 
         validateBooking(existingBooking, userId);
 
-        return BookingMapper.toBookingDto(bookingRepository.update(existingBooking));
+        return bookingMapper.toBookingDto(bookingRepository.update(existingBooking));
     }
 
     /**
@@ -178,7 +215,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELED);
-        return BookingMapper.toBookingDto(bookingRepository.update(booking));
+        return bookingMapper.toBookingDto(bookingRepository.update(booking));
     }
 
     /**
@@ -189,32 +226,6 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.deleteById(bookingId);
     }
 
-    private List<Booking> getBookingsByState(Long userId, String state, LocalDateTime now, boolean isBooker) {
-        switch (state.toUpperCase()) {
-            case "ALL":
-                return isBooker ? bookingRepository.findByBookerId(userId) : bookingRepository.findByOwnerId(userId);
-            case "CURRENT":
-                return isBooker ? bookingRepository.findCurrentByBookerId(userId, now) :
-                        bookingRepository.findCurrentByOwnerId(userId, now);
-            case "FUTURE":
-                return isBooker ? bookingRepository.findFutureByBookerId(userId, now) :
-                        bookingRepository.findFutureByOwnerId(userId, now);
-            case "PAST":
-                return isBooker ? bookingRepository.findPastByBookerId(userId, now) :
-                        bookingRepository.findPastByOwnerId(userId, now);
-            case "WAITING":
-                return isBooker ? bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING) :
-                        bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.WAITING);
-            case "REJECTED":
-                return isBooker ? bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED) :
-                        bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.REJECTED);
-            case "APPROVED":
-                return isBooker ? bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.APPROVED) :
-                        bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.APPROVED);
-            default:
-                throw new ValidationException("Unknown state: " + state);
-        }
-    }
 
     /**
      * Валидация бизнес-правил бронирования

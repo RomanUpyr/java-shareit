@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -21,7 +20,7 @@ public class ItemServiceImpl implements ItemService {
     // Внедрение зависимости репозитория через конструктор
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final ItemRequestRepository itemRequestRepository;
+    private final ItemMapper itemMapper;
 
     /**
      * Создает вещь, предварительно проверив существование владельца
@@ -31,10 +30,10 @@ public class ItemServiceImpl implements ItemService {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + ownerId));
 
-        Item item = ItemMapper.toItem(itemDto, itemRequestRepository);
+        Item item = itemMapper.toItem(itemDto);
         item.setOwner(owner);
 
-        return ItemMapper.toItemDto(itemRepository.save(item));
+        return itemMapper.toItemDto(itemRepository.save(item));
     }
 
     /**
@@ -44,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto getById(Long id) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + id));
-        return ItemMapper.toItemDto(item);
+        return itemMapper.toItemDto(item);
     }
 
     /**
@@ -53,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getByOwnerId(Long ownerId) {
         return itemRepository.findByOwnerId(ownerId).stream()
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
@@ -81,7 +80,7 @@ public class ItemServiceImpl implements ItemService {
             existingItem.setAvailable(itemDto.getAvailable());
         }
 
-        return ItemMapper.toItemDto(itemRepository.update(existingItem));
+        return itemMapper.toItemDto(itemRepository.update(existingItem));
     }
 
     /**
@@ -98,7 +97,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> search(String text) {
         return itemRepository.search(text).stream()
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 

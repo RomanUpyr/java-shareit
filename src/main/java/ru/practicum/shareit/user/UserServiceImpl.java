@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     // Внедрение зависимости репозитория через конструктор
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     /**
      * Создает пользователя, преобразуя DTO в Entity и обратно.
@@ -26,15 +27,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto create(UserDto userDto) {
         // Проверка уникальности email
-        userRepository.findAll().stream()
-                .filter(user -> user.getEmail().equals(userDto.getEmail()))
-                .findFirst()
-                .ifPresent(user -> {
-                    throw new ConflictException("Email already exists: " + userDto.getEmail());
-                });
+        if (userRepository.existsByEmail(userDto.getEmail())) {
+            throw new ConflictException("Email already exists: " + userDto.getEmail());
+        }
+        ;
 
-        User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(userRepository.save(user));
+        User user = userMapper.toUser(userDto);
+        return userMapper.toUserDto(userRepository.save(user));
     }
 
     /**
@@ -44,7 +43,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
-        return UserMapper.toUserDto(user);
+        return userMapper.toUserDto(user);
     }
 
     /**
@@ -53,7 +52,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
-                .map(UserMapper::toUserDto)
+                .map(userMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
@@ -67,12 +66,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
 
         if (userDto.getEmail() != null && !userDto.getEmail().equals(existingUser.getEmail())) {
-            userRepository.findAll().stream()
-                    .filter(user -> user.getEmail().equals(userDto.getEmail()))
-                    .findFirst()
-                    .ifPresent(user -> {
-                        throw new ConflictException("Email already exists: " + userDto.getEmail());
-                    });
+            if (userRepository.existsByEmail(userDto.getEmail())) {
+                throw new ConflictException("Email already exists: " + userDto.getEmail());
+            }
+
         }
 
         if (userDto.getName() != null) {
@@ -82,7 +79,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setEmail(userDto.getEmail());
         }
 
-        return UserMapper.toUserDto(userRepository.update(existingUser));
+        return userMapper.toUserDto(userRepository.update(existingUser));
     }
 
     /**

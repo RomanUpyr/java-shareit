@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
@@ -16,12 +17,17 @@ import ru.practicum.shareit.user.UserRepository;
  * Маппер для преобразования между Entity и DTO объектов бронирования.
  */
 @Component
+@RequiredArgsConstructor
 public class BookingMapper {
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final ItemMapper itemMapper;
+    private final UserMapper userMapper;
+
     /**
      * Преобразует DTO бронирования в Entity для сохранения в базу данных.
      */
-    public static Booking toBooking(BookingDto bookingDto, Long bookerId,
-                                    ItemRepository itemRepository, UserRepository userRepository) {
+    public Booking toBooking(BookingDto bookingDto, Long bookerId) {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + bookingDto.getItemId()));
 
@@ -42,14 +48,14 @@ public class BookingMapper {
     /**
      * Преобразует Entity бронирования в DTO для возврата клиенту.
      */
-    public static BookingDto toBookingDto(Booking booking) {
+    public BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
                 booking.getId(),
                 booking.getStart(),
                 booking.getEnd(),
                 booking.getStatus(),
-                ItemMapper.toItemDto(booking.getItem()),
-                UserMapper.toUserDto(booking.getBooker()),
+                itemMapper.toItemDto(booking.getItem()),
+                userMapper.toUserDto(booking.getBooker()),
                 booking.getBooker().getId()
         );
     }
@@ -57,7 +63,7 @@ public class BookingMapper {
     /**
      * Преобразует Entity бронирования в краткий DTO.
      */
-    public static BookingDto toBookingDtoShort(Booking booking) {
+    public BookingDto toBookingDtoShort(Booking booking) {
         BookingDto dto = new BookingDto();
         dto.setId(booking.getId());
         dto.setStart(booking.getStart());
@@ -72,7 +78,7 @@ public class BookingMapper {
      * Преобразует Entity бронирования в DTO для ответа на запрос.
      * Автоматически определяет уровень детализации на основе контекста.
      */
-    public static BookingDto toBookingDto(Booking booking, boolean includeDetails) {
+    public BookingDto toBookingDto(Booking booking, boolean includeDetails) {
         if (includeDetails) {
             return toBookingDto(booking);
         } else {

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -13,14 +14,17 @@ import java.time.LocalDateTime;
  * Маппер для преобразования между Entity и DTO объектов запроса вещи.
  */
 @Component
+@RequiredArgsConstructor
 public class ItemRequestMapper {
+    private final UserRepository userRepository;
+
     /**
      * Преобразует Entity запроса в DTO для возврата клиенту.
      *
      * @param itemRequest Entity запроса из базы данных.
      * @return ItemRequestDto объект для передачи клиенту.
      */
-    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
+    public ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
         return new ItemRequestDto(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
@@ -33,11 +37,10 @@ public class ItemRequestMapper {
      * Преобразует DTO запроса в Entity для сохранения в базу данных.
      *
      * @param itemRequestDto DTO запроса от клиента.
-     * @param userRepository репозиторий для поиска пользователя.
      * @return ItemRequest Entity для сохранения.
      * @throws NotFoundException если пользователь не найден.
      */
-    public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto, UserRepository userRepository) {
+    public ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
         User requestor = userRepository.findById(itemRequestDto.getRequestorId())
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + itemRequestDto.getRequestorId()));
 

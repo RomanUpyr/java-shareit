@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.strategy.BookingStateFetchStrategy;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**

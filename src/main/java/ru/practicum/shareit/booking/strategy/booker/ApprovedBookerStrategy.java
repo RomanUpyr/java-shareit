@@ -9,7 +9,6 @@ import ru.practicum.shareit.booking.strategy.BookingStateFetchStrategy;
 
 import java.util.List;
 
-import java.time.LocalDateTime;
 
 /**
  * Стратегия для получения "ПОДТВЕРЖДЕННЫХ" бронирований пользователя.

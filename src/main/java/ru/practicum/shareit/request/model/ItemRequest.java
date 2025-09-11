@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.dto;
+package ru.practicum.shareit.request.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,36 +10,38 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * DTO для передачи данных о запросе вещи.
+ * Модель запроса вещи.
+ * Пользователь создает запрос, если не находит нужную вещь в системе.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemRequestDto {
+public class ItemRequest {
     /**
      * Уникальный идентификатор запроса.
      */
+    @NotNull(message = "ItemRequest Id не должен быть null")
     private Long id;
 
     /**
-     * Текст запроса с описанием требуемой вещи/
-     * Не может быть пустым/
+     * Текст запроса с описанием требуемой вещи.
      */
-    @NotBlank(message = "Описание не может быть пустым")
+    @NotNull(message = "ItemRequest description не должен быть null")
+    @NotBlank(message = "ItemRequest description не должен быть пустым")
     private String description;
 
     /**
      * Пользователь, создавший запрос.
+     * Много запросов могут быть от одного пользователя(связь many-to-one).
      */
     @NotNull(message = "ItemRequest requestor не должен быть null")
     private Long requestorId;
 
     /**
      * Дата и время создания запроса.
-     * Устанавливается автоматически на сервере
+     * Устанавливается автоматически при создании.
      */
     @NotNull(message = "Дата начала ItemRequest не может быть null")
     @PastOrPresent(message = "Дата начала ItemRequest должна быть в прошлом или настоящем")
     private LocalDateTime created;
-
 }

@@ -19,4 +19,9 @@ public class WaitingBookerStrategy implements BookingStateFetchStrategy {
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
         return bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING);
     }
+
+    @Override
+    public String getState() {
+        return "WAITING";
+    }
 }

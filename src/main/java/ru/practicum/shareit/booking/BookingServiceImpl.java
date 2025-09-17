@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.strategy.BookingStateFetchStrategy;
+import ru.practicum.shareit.booking.strategy.BookingStrategyContext;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -15,7 +15,6 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -28,17 +27,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
-
-    /**
-     * Карта стратегий для пользователя.
-     */
-    private final Map<String, BookingStateFetchStrategy> bookerStrategies;
-
-    /**
-     * Карта стратегий для владельца.
-     */
-    private final Map<String, BookingStateFetchStrategy> ownerStrategies;
-
+    private final BookingStrategyContext strategyContext;
 
     /**
      * Создает бронирование с проверками:
@@ -112,15 +101,9 @@ public class BookingServiceImpl implements BookingService {
         if (!userRepository.existsById(bookerId)) {
             throw new NotFoundException("User not found with id: " + bookerId);
         }
-        // Получаем стратегию по состоянию
-        BookingStateFetchStrategy strategy = bookerStrategies.get(state.toUpperCase());
 
-        if (strategy == null) {
-            throw new ValidationException("Unknown state: " + state);
-        }
-
-        // Используем стратегию для получения бронирований
-        List<Booking> bookings = strategy.findBookings(bookerId, bookingRepository);
+        // Используем контекст стратегий для получения бронирований
+        List<Booking> bookings = strategyContext.executeStrategy(state, bookerId, bookingRepository);
 
         return bookings.stream()
                 .map(booking -> bookingMapper.toBookingDto(booking, true))
@@ -136,18 +119,8 @@ public class BookingServiceImpl implements BookingService {
         if (!userRepository.existsById(ownerId)) {
             throw new NotFoundException("User not found with id: " + ownerId);
         }
-
-        LocalDateTime now = LocalDateTime.now();
-
-        // Получаем стратегию по состоянию
-        BookingStateFetchStrategy strategy = ownerStrategies.get(state.toUpperCase());
-
-        if (strategy == null) {
-            throw new ValidationException("Unknown state: " + state);
-        }
-
-        // Используем стратегию для получения бронирований
-        List<Booking> bookings = strategy.findBookings(ownerId, bookingRepository);
+        // Используем контекст стратегий для получения бронирований
+        List<Booking> bookings = strategyContext.executeStrategy(state, ownerId, bookingRepository);
 
         return bookings.stream()
                 .map(bookingMapper::toBookingDto)

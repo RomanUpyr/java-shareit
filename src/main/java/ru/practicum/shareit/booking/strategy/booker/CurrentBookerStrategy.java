@@ -21,4 +21,9 @@ public class CurrentBookerStrategy implements BookingStateFetchStrategy {
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
         return bookingRepository.findCurrentByBookerId(userId, LocalDateTime.now());
     }
+
+    @Override
+    public String getState() {
+        return "CURRENT";
+    }
 }

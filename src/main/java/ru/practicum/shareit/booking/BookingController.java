@@ -14,7 +14,9 @@ import java.util.List;
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
 public class BookingController {
+
     private final BookingService bookingService;
+
 
     // Имя заголовка для передачи идентификатора пользователя
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";

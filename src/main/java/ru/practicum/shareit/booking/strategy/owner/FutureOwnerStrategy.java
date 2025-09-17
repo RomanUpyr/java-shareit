@@ -19,4 +19,9 @@ public class FutureOwnerStrategy implements BookingStateFetchStrategy {
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
         return bookingRepository.findFutureByOwnerId(userId, LocalDateTime.now());
     }
+
+    @Override
+    public String getState() {
+        return "FUTURE";
+    }
 }

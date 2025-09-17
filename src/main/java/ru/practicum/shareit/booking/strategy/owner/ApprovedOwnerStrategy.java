@@ -19,4 +19,9 @@ public class ApprovedOwnerStrategy implements BookingStateFetchStrategy {
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
         return bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.APPROVED);
     }
+
+    @Override
+    public String getState() {
+        return "APPROVED";
+    }
 }

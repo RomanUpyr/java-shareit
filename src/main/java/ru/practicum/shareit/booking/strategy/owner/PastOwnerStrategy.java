@@ -19,4 +19,9 @@ public class PastOwnerStrategy implements BookingStateFetchStrategy {
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
         return bookingRepository.findPastByOwnerId(userId, LocalDateTime.now());
     }
+
+    @Override
+    public String getState() {
+        return "PAST";
+    }
 }

@@ -19,4 +19,11 @@ public class AllBookerStrategy implements BookingStateFetchStrategy {
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
         return bookingRepository.findByBookerId(userId);
     }
+
+    @Override
+    public String getState() {
+        return "ALL";
+    }
+
+
 }

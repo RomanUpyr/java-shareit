@@ -19,4 +19,9 @@ public class RejectedBookerStrategy implements BookingStateFetchStrategy {
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
         return bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED);
     }
+
+    @Override
+    public String getState() {
+        return "REJECTED";
+    }
 }

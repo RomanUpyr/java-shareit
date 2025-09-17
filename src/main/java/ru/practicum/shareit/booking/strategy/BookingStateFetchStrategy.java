@@ -17,4 +17,9 @@ public interface BookingStateFetchStrategy {
      * @return список бронирований, отфильтрованных по стратегии
      */
     List<Booking> findBookings(Long userId, BookingRepository bookingRepository);
+
+    /**
+     * Возвращает тип состояния для маппинга стратегии.
+     */
+    String getState();
 }

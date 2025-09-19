@@ -1,35 +1,42 @@
 package ru.practicum.shareit.user.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * Модель пользователя системы.
  * Содержит информацию о пользователе, который может владеть вещами и брать их в аренду.
  */
-@Data
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
     /**
      * Уникальный идентификатор пользователя.
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull(message = "User id не должен быть null")
     private Long id;
 
     /**
      * Имя пользователя.
      */
+    @Column(name = "name", nullable = false)
     @NotNull(message = "User name не должен быть null")
     private String name;
 
     /**
      * Адрес электронной почты пользователя.
      */
+    @Column(name = "email", nullable = false, unique = true, length = 512)
     @NotBlank(message = "Email не должен быть пустым")
     @Email(message = "Email должен соответствовать формату email")
     private String email;

@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ItemServiceImpl implements ItemService {
     // Внедрение зависимости репозитория через конструктор
     private final ItemRepository itemRepository;
@@ -26,6 +28,7 @@ public class ItemServiceImpl implements ItemService {
      * Создает вещь, предварительно проверив существование владельца
      */
     @Override
+    @Transactional
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + ownerId));
@@ -40,6 +43,7 @@ public class ItemServiceImpl implements ItemService {
      * Находит вещь по идентификатору.
      */
     @Override
+    @Transactional(readOnly = true)
     public ItemDto getById(Long id) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + id));
@@ -50,6 +54,7 @@ public class ItemServiceImpl implements ItemService {
      * Находит все вещи определенного владельца.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> getByOwnerId(Long ownerId) {
         return itemRepository.findByOwnerId(ownerId).stream()
                 .map(itemMapper::toItemDto)
@@ -60,6 +65,7 @@ public class ItemServiceImpl implements ItemService {
      * Обновляет вещь с проверкой прав доступа.
      */
     @Override
+    @Transactional
     public ItemDto update(Long id, ItemDto itemDto, Long ownerId) {
         Item existingItem = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + id));
@@ -87,6 +93,7 @@ public class ItemServiceImpl implements ItemService {
      * Удаляет вещь.
      */
     @Override
+    @Transactional
     public void delete(Long id) {
         itemRepository.deleteById(id);
     }
@@ -95,6 +102,7 @@ public class ItemServiceImpl implements ItemService {
      * Ищет доступные вещи по тексту.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> search(String text) {
         return itemRepository.search(text).stream()
                 .map(itemMapper::toItemDto)

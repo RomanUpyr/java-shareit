@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.Optional;
 /**
  * Интерфейс репозитория для работы с пользователями.
  */
-public interface UserRepository {
+public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * Сохраняет нового пользователя
      *

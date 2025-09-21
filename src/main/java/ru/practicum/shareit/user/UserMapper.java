@@ -17,6 +17,9 @@ public class UserMapper {
      * @return UserDto объект для передачи клиенту
      */
     public UserDto toUserDto(User user) {
+        if (user == null) {
+            return null;
+        }
         return new UserDto(
                 user.getId(),
                 user.getName(),

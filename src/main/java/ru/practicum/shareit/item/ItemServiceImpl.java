@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,7 +87,7 @@ public class ItemServiceImpl implements ItemService {
             existingItem.setAvailable(itemDto.getAvailable());
         }
 
-        return itemMapper.toItemDto(itemRepository.update(existingItem));
+        return itemMapper.toItemDto(itemRepository.save(existingItem));
     }
 
     /**
@@ -104,6 +105,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> search(String text) {
+        if (text == null || text.isBlank()) {
+            return Collections.emptyList();
+        }
         return itemRepository.search(text).stream()
                 .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());

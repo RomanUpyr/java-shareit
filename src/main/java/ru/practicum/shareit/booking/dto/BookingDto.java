@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
@@ -21,46 +23,56 @@ public class BookingDto {
     /**
      * Уникальный идентификатор бронирования.
      */
+    @JsonProperty("id")
     private Long id;
 
     /**
      * Идентификатор вещи, которую хотят забронировать.
      */
+    @JsonProperty("itemId")
     @NotNull(message = "Item ID не должен быть null", groups = {Create.class})
     private Long itemId;
 
     /**
      * Дата и время начала бронирования.
      */
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @NotNull(message = "Дата начала бронирования не может быть null", groups = {Create.class, Update.class})
     @FutureOrPresent(message = "Дата начала бронирования должна быть в будущем или настоящем", groups = {Create.class, Update.class})
+    @JsonProperty("start")
     private LocalDateTime start;
 
     /**
      * Дата и время окончания бронирования.
      */
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @NotNull(message = "Дата окончания бронирования не может быть null", groups = {Create.class, Update.class})
     @Future(message = "Дата окончания бронирования должна быть в будущем", groups = {Create.class, Update.class})
+    @JsonProperty("end")
     private LocalDateTime end;
 
     /**
      * Вещь, которая бронируется.
      */
+    @JsonProperty("item")
     private ItemDto item;
 
     /**
      * Статус бронирования.
      */
+    @JsonProperty("status")
     private BookingStatus status;
 
     /**
      * Пользователь, который осуществляет бронирование.
      */
+    @JsonProperty("booker")
     private UserDto booker;
 
     /**
      * Идентификатор пользователя, который бронирует.
      */
+    @JsonProperty("bookerId")
     private Long bookerId;
 
     /**

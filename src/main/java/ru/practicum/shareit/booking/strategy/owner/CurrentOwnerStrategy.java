@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 public class CurrentOwnerStrategy implements BookingStateFetchStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findCurrentByOwnerId(userId, LocalDateTime.now());
+        return bookingRepository.findByItemOwnerIdAndStartBeforeOrderByStartDesc(userId, LocalDateTime.now());
     }
 
     @Override

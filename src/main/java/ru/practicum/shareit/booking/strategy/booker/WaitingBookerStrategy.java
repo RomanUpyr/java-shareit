@@ -17,7 +17,7 @@ import java.util.List;
 public class WaitingBookerStrategy implements BookingStateFetchStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING);
+        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
     }
 
     @Override

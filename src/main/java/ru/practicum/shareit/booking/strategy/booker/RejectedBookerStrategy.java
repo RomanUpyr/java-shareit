@@ -17,7 +17,7 @@ import java.util.List;
 public class RejectedBookerStrategy implements BookingStateFetchStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED);
+        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
     }
 
     @Override

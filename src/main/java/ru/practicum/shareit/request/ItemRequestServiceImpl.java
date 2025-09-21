@@ -1,9 +1,14 @@
 package ru.practicum.shareit.request;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,27 +22,32 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     // Внедрение зависимости репозитория через конструктор
     private final ItemRequestRepository itemRequestRepository;
     private final ItemRequestMapper itemRequestMapper;
+    private final UserRepository userRepository;
 
     /**
      * Создает запрос, предварительно проверив существование пользователя
      */
     @Override
-    public ItemRequestDto create(ItemRequestDto itemRequestDto, Long requestorId) {
-        // Устанавливаем ID пользователя из параметра
-        itemRequestDto.setRequestorId(requestorId);
+    @Transactional
+    public ItemRequestDto create(ItemRequestDto itemRequestDto, Long userId) {
+        User requester = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
 
-        // Проверяем существование пользователя через маппер
-        var itemRequest = itemRequestMapper.toItemRequest(itemRequestDto);
+        ItemRequest itemRequest = itemRequestMapper.toItemRequest(itemRequestDto);
+        ItemRequest savedRequest = itemRequestRepository.save(itemRequest);
 
-        return itemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest));
+        return itemRequestMapper.toItemRequestDto(savedRequest);
     }
+
+
 
     /**
      * Находит запрос по ID
      */
     @Override
+    @Transactional(readOnly = true)
     public ItemRequestDto getById(Long id) {
-        var itemRequest = itemRequestRepository.findById(id)
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item request not found with id: " + id));
         return itemRequestMapper.toItemRequestDto(itemRequest);
     }
@@ -46,8 +56,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      * Возвращает запросы текущего пользователя
      */
     @Override
-    public List<ItemRequestDto> getByRequestorId(Long requestorId) {
-        return itemRequestRepository.findByRequestorId(requestorId).stream()
+    @Transactional(readOnly = true)
+    public List<ItemRequestDto> getByUserId(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found with id: " + userId);
+        }
+        return itemRequestRepository.findByRequesterIdOrderByCreatedDesc(userId).stream()
                 .map(itemRequestMapper::toItemRequestDto)
                 .collect(Collectors.toList());
     }
@@ -56,8 +70,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      * Возвращает запросы других пользователей
      */
     @Override
-    public List<ItemRequestDto> getAllExceptRequestor(Long userId) {
-        return itemRequestRepository.findAllExceptRequestor(userId).stream()
+    @Transactional(readOnly = true)
+    public List<ItemRequestDto> getAllExceptUser(Long userId,  int from, int size) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found with id: " + userId);
+        }
+        return itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(userId).stream()
+                .skip(from)
+                .limit(size)
                 .map(itemRequestMapper::toItemRequestDto)
                 .collect(Collectors.toList());
     }
@@ -67,14 +87,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      */
     @Override
     public ItemRequestDto update(Long id, ItemRequestDto itemRequestDto) {
-        var existingRequest = itemRequestRepository.findById(id)
+        ItemRequest existingRequest = itemRequestRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item request not found with id: " + id));
 
         if (itemRequestDto.getDescription() != null) {
             existingRequest.setDescription(itemRequestDto.getDescription());
         }
 
-        return itemRequestMapper.toItemRequestDto(itemRequestRepository.update(existingRequest));
+        return itemRequestMapper.toItemRequestDto(itemRequestRepository.save(existingRequest));
     }
 
     /**

@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 public class CurrentBookerStrategy implements BookingStateFetchStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findCurrentByBookerId(userId, LocalDateTime.now());
+        return bookingRepository.findByBookerIdAndStartBeforeOrderByStartDesc(userId, LocalDateTime.now());
     }
 
     @Override

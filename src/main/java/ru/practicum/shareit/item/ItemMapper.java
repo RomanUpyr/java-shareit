@@ -25,6 +25,9 @@ public class ItemMapper {
      * @return ItemDto объект для передачи клиенту
      */
     public ItemDto toItemDto(Item item) {
+        if (item == null) {
+            return null;
+        }
         return new ItemDto(
                 item.getId(),
                 item.getName(),

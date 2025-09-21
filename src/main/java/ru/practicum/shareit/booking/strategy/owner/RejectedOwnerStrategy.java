@@ -17,7 +17,7 @@ import java.util.List;
 public class RejectedOwnerStrategy implements BookingStateFetchStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.REJECTED);
+        return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
     }
 
     @Override

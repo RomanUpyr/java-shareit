@@ -16,7 +16,7 @@ import java.util.List;
 public class AllOwnerStrategy implements BookingStateFetchStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findByOwnerId(userId);
+        return bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
     }
 
     @Override

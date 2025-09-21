@@ -23,7 +23,6 @@ public class User {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull(message = "User id не должен быть null")
     private Long id;
 
     /**

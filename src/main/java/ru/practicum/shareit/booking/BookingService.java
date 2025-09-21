@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * Интерфейс сервиса для работы с бронированиями.
  */
-@Service
 public interface BookingService {
     /**
      * Создает новое бронирование.

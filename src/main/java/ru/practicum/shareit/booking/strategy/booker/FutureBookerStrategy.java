@@ -17,7 +17,7 @@ import java.util.List;
 public class FutureBookerStrategy implements BookingStateFetchStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findFutureByBookerId(userId, LocalDateTime.now());
+        return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
     }
 
     @Override

@@ -26,7 +26,6 @@ public class ItemRequest {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull(message = "ItemRequest Id не должен быть null")
     private Long id;
 
     /**

@@ -23,7 +23,6 @@ public class Item {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull(message = "Item Id не должен быть null")
     private Long id;
 
     /**

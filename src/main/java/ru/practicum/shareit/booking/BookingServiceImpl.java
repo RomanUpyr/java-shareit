@@ -109,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // Используем контекст стратегий для получения бронирований
-        List<Booking> bookings = strategyContext.executeStrategy(state, bookerId, bookingRepository);
+        List<Booking> bookings = strategyContext.executeBookerStrategy(state, bookerId, bookingRepository);
 
         return bookings.stream()
                 .map(booking -> bookingMapper.toBookingDto(booking, true))
@@ -127,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("User not found with id: " + ownerId);
         }
         // Используем контекст стратегий для получения бронирований
-        List<Booking> bookings = strategyContext.executeStrategy(state, ownerId, bookingRepository);
+        List<Booking> bookings = strategyContext.executeOwnerStrategy(state, ownerId, bookingRepository);
 
         return bookings.stream()
                 .map(booking -> bookingMapper.toBookingDto(booking, true))

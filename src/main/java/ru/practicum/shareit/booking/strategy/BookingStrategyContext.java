@@ -13,24 +13,32 @@ import java.util.Map;
  */
 @Component
 public class BookingStrategyContext {
-    private final Map<String, BookingStateFetchStrategy> strategyMap = new HashMap<>();
+    private final Map<String, BookingStateFetchStrategy> bookerStrategyMap = new HashMap<>();
+    private final Map<String, BookingStateFetchStrategy> ownerStrategyMap = new HashMap<>();
 
     public BookingStrategyContext(List<BookingStateFetchStrategy> strategies) {
         for (BookingStateFetchStrategy strategy : strategies) {
-            strategyMap.put(strategy.getState().toUpperCase(), strategy);
+            if (strategy.getClass().getSimpleName().toLowerCase().contains("owner")) {
+                ownerStrategyMap.put(strategy.getState().toUpperCase(), strategy);
+            } else {
+                bookerStrategyMap.put(strategy.getState().toUpperCase(), strategy);
+            }
         }
     }
 
-    public BookingStateFetchStrategy getStrategy(String state) {
-        BookingStateFetchStrategy strategy = strategyMap.get(state.toUpperCase());
+    public List<Booking> executeBookerStrategy(String state, Long userId, BookingRepository bookingRepository) {
+        BookingStateFetchStrategy strategy = bookerStrategyMap.get(state.toUpperCase());
         if (strategy == null) {
-            throw new IllegalArgumentException("Не известное состояние бронирования: " + state);
+            throw new IllegalArgumentException("Unknown booking state for booker: " + state);
         }
-        return strategy;
+        return strategy.findBookings(userId, bookingRepository);
     }
 
-    public List<Booking> executeStrategy(String state, Long userId, BookingRepository bookingRepository) {
-        BookingStateFetchStrategy strategy = getStrategy(state);
+    public List<Booking> executeOwnerStrategy(String state, Long userId, BookingRepository bookingRepository) {
+        BookingStateFetchStrategy strategy = ownerStrategyMap.get(state.toUpperCase());
+        if (strategy == null) {
+            throw new IllegalArgumentException("Unknown booking state for owner: " + state);
+        }
         return strategy.findBookings(userId, bookingRepository);
     }
 }

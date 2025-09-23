@@ -40,7 +40,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
 
-
     /**
      * Находит запрос по ID
      */
@@ -71,7 +70,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<ItemRequestDto> getAllExceptUser(Long userId,  int from, int size) {
+    public List<ItemRequestDto> getAllExceptUser(Long userId, int from, int size) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User not found with id: " + userId);
         }

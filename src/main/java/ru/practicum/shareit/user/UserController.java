@@ -14,7 +14,6 @@ import java.util.List;
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
 public class UserController {
-    // Внедрение зависимости сервиса через конструктор
     private final UserService userService;
 
     /**

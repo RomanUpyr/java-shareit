@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public interface ItemService {
      * @return вещь в формате DTO.
      * @throws NotFoundException если вещь не найдена.
      */
-    ItemDto getById(Long id);
+    ItemDto getById(Long id, Long userId);
 
     /**
      * Находит все вещи определенного владельца.
@@ -62,4 +63,24 @@ public interface ItemService {
      * @return список подходящих вещей в формате DTO.
      */
     List<ItemDto> search(String text);
+
+    /**
+     * Добавляет комментарий к вещи.
+     *
+     * @param itemId     идентификатор вещи
+     * @param commentDto DTO комментария
+     * @param userId     идентификатор автора комментария
+     * @return созданный комментарий
+     */
+    CommentDto addComment(Long itemId, CommentDto commentDto, Long userId);
+
+    /**
+     * Находит последнее завершенное бронирование для вещи.
+     */
+    ItemDto.BookingInfoDto findLastBooking(Long itemId);
+
+    /**
+     * Находит ближайшее следующее бронирование для вещи.
+     */
+    ItemDto.BookingInfoDto findNextBooking(Long itemId);
 }

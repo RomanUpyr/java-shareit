@@ -20,6 +20,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      */
     @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.booker.id = :bookerId ORDER BY b.start DESC")
     List<Booking> findByBookerIdOrderByStartDesc(@Param("bookerId") Long bookerId);
+
     /**
      * Находит бронирования пользователя с определенным статусом, отсортированные по дате начала.
      */
@@ -96,5 +97,24 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.booker.id = :bookerId AND b.status = :status AND b.end <= :end ORDER BY b.end DESC")
     Optional<Booking> findFirstByItemIdAndBookerIdAndStatusAndEndBefore(
             @Param("itemId") Long itemId, @Param("bookerId") Long bookerId, @Param("status") BookingStatus status, @Param("end") LocalDateTime end);
+
+    /**
+     * Находит завершенные бронирования вещи, отсортированные по дате окончания (от новых к старым).
+     */
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.end < :currentTime AND b.status = 'APPROVED' ORDER BY b.end DESC")
+    List<Booking> findCompletedBookingsByItemId(@Param("itemId") Long itemId, @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Находит будущие бронирования вещи, отсортированные по дате начала (от ближайших к дальним).
+     */
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.start > :currentTime AND b.status = 'APPROVED' ORDER BY b.start ASC")
+    List<Booking> findFutureBookingsByItemId(@Param("itemId") Long itemId, @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Находит текущие бронирования вещи.
+     */
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.start <= :currentTime AND b.end >= :currentTime AND b.status = 'APPROVED' ORDER BY b.start DESC")
+    List<Booking> findCurrentBookingsByItemId(@Param("itemId") Long itemId, @Param("currentTime") LocalDateTime currentTime);
+
 
 }

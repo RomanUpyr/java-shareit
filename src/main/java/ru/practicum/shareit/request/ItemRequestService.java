@@ -41,7 +41,7 @@ public interface ItemRequestService {
      * @param userId идентификатор пользователя (чтобы исключить его запросы).
      * @return список запросов других пользователей в формате DTO.
      */
-    List<ItemRequestDto> getAllExceptUser(Long userId,  int from, int size);
+    List<ItemRequestDto> getAllExceptUser(Long userId, int from, int size);
 
     /**
      * Обновляет данные запроса.

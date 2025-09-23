@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Интерфейс репозитория для работы с запросами вещей.

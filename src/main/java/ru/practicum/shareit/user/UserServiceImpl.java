@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
-    // Внедрение зависимости репозитория через конструктор
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -29,7 +28,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
-        // Проверка уникальности email
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new ConflictException("Email already exists: " + userDto.getEmail());
         }
@@ -54,7 +52,7 @@ public class UserServiceImpl implements UserService {
      * Возвращает всех пользователей, преобразуя Entity в DTO.
      */
     @Override
-    @Transactional (readOnly = true)
+    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toUserDto)
@@ -63,7 +61,6 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Частично обновляет пользователя.
-     * Обновляет только те поля, которые не null в DTO.
      */
     @Override
     @Transactional

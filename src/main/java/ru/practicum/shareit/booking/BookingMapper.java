@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -21,7 +20,6 @@ import ru.practicum.shareit.user.UserRepository;
  */
 @Component
 @RequiredArgsConstructor
-@Builder
 public class BookingMapper {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;

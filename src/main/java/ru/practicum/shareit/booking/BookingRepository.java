@@ -18,14 +18,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     /**
      * Находит все бронирования определенного пользователя, отсортированные по дате начала.
      */
-    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.booker.id = :bookerId ORDER BY b.start DESC")
-    List<Booking> findByBookerIdOrderByStartDesc(@Param("bookerId") Long bookerId);
+    List<Booking> findByBookerIdOrderByStartDesc(Long bookerId);
 
     /**
      * Находит бронирования пользователя с определенным статусом, отсортированные по дате начала.
      */
-    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.booker.id = :bookerId AND b.status = :status ORDER BY b.start DESC")
-    List<Booking> findByBookerIdAndStatusOrderByStartDesc(@Param("bookerId") Long bookerId, @Param("status") BookingStatus status);
+    List<Booking> findByBookerIdAndStatusOrderByStartDesc(Long bookerId, BookingStatus status);
 
     /**
      * Находит текущие бронирования пользователя.
@@ -37,8 +35,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     /**
      * Находит завершенные бронирования пользователя.
      */
-    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.booker.id = :bookerId AND b.end <= :end ORDER BY b.start DESC")
-    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(@Param("bookerId") Long bookerId, @Param("end") LocalDateTime end);
+    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(Long bookerId, LocalDateTime end);
 
     /**
      * Находит будущие бронирования пользователя.
@@ -81,14 +78,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      * Находит пересекающиеся бронирования для указанной вещи.
      * Используется для проверки доступности вещи в заданный период.
      */
-    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.status = 'APPROVED' " +
+    @Query("SELECT CASE WHEN COUNT(b) > 0 THEN TRUE ELSE FALSE END FROM Booking b WHERE " +
+            "b.item.id = :itemId AND b.status = 'APPROVED' " +
             "AND (:excludeBookingId IS NULL OR b.id <> :excludeBookingId) " +
             "AND ((b.start BETWEEN :start AND :end) OR (b.end BETWEEN :start AND :end) " +
             "OR (b.start <= :start AND b.end >= :end))")
-    List<Booking> findOverlappingBookings(@Param("itemId") Long itemId,
-                                          @Param("start") LocalDateTime start,
-                                          @Param("end") LocalDateTime end,
-                                          @Param("excludeBookingId") Long excludeBookingId);
+    boolean existOverlappingBookings(@Param("itemId") Long itemId,
+                                     @Param("start") LocalDateTime start,
+                                     @Param("end") LocalDateTime end,
+                                     @Param("excludeBookingId") Long excludeBookingId);
 
     /**
      * Находит последнее завершенное бронирование вещи пользователем.
@@ -113,8 +111,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     /**
      * Находит текущие бронирования вещи.
      */
-    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.start <= :currentTime AND b.end >= :currentTime AND b.status = 'APPROVED' ORDER BY b.start DESC")
+    @Query("SELECT b FROM Booking b WHERE b.item.id IN :itemIds AND b.end < :currentTime " +
+            "AND b.status = 'APPROVED' ORDER BY b.end DESC")
     List<Booking> findCurrentBookingsByItemId(@Param("itemId") Long itemId, @Param("currentTime") LocalDateTime currentTime);
+
+
+    List<Booking> findByItemIdInAndStatusOrderByStartAsc(List<Long> itemIds, BookingStatus status);
 
 
 }

@@ -234,10 +234,10 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // Проверяем доступность вещи в указанный период
-        List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(
+        boolean hasOverlap = bookingRepository.existOverlappingBookings(
                 item.getId(), booking.getStart(), booking.getEnd(), booking.getId());
 
-        if (!overlappingBookings.isEmpty()) {
+        if (hasOverlap) {
             throw new ValidationException("Item is already booked for this period");
         }
     }

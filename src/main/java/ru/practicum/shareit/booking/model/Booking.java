@@ -57,7 +57,7 @@ public class Booking {
     /**
      * Пользователь, который осуществляет бронирование
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "booker_id", nullable = false)
     private User booker;
 

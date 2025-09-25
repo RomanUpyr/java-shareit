@@ -3,31 +3,39 @@ package ru.practicum.shareit.booking.strategy;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.strategy.booker.BookerStrategy;
+import ru.practicum.shareit.booking.strategy.owner.OwnerStrategy;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Контекст для управления стратегиями получения бронирований.
  */
 @Component
 public class BookingStrategyContext {
-    private final Map<String, BookingStateFetchStrategy> bookerStrategyMap = new HashMap<>();
-    private final Map<String, BookingStateFetchStrategy> ownerStrategyMap = new HashMap<>();
+    private final Map<String, BookerStrategy> bookerStrategies;
+    private final Map<String, OwnerStrategy> ownerStrategies;
 
-    public BookingStrategyContext(List<BookingStateFetchStrategy> strategies) {
-        for (BookingStateFetchStrategy strategy : strategies) {
-            if (strategy.getClass().getSimpleName().toLowerCase().contains("owner")) {
-                ownerStrategyMap.put(strategy.getState().toUpperCase(), strategy);
-            } else {
-                bookerStrategyMap.put(strategy.getState().toUpperCase(), strategy);
-            }
-        }
+    public BookingStrategyContext(
+            List<BookerStrategy> bookerStrategyList,
+            List<OwnerStrategy> ownerStrategyList) {
+        this.bookerStrategies = bookerStrategyList.stream()
+                .collect(Collectors.toMap(
+                        strategy -> strategy.getState().toUpperCase(),
+                        Function.identity()
+                ));
+        this.ownerStrategies = ownerStrategyList.stream()
+                .collect(Collectors.toMap(
+                        strategy -> strategy.getState().toUpperCase(),
+                        Function.identity()
+                ));
     }
 
     public List<Booking> executeBookerStrategy(String state, Long userId, BookingRepository bookingRepository) {
-        BookingStateFetchStrategy strategy = bookerStrategyMap.get(state.toUpperCase());
+        BookingStateFetchStrategy strategy = bookerStrategies.get(state.toUpperCase());
         if (strategy == null) {
             throw new IllegalArgumentException("Unknown booking state for booker: " + state);
         }
@@ -35,7 +43,7 @@ public class BookingStrategyContext {
     }
 
     public List<Booking> executeOwnerStrategy(String state, Long userId, BookingRepository bookingRepository) {
-        BookingStateFetchStrategy strategy = ownerStrategyMap.get(state.toUpperCase());
+        BookingStateFetchStrategy strategy = ownerStrategies.get(state.toUpperCase());
         if (strategy == null) {
             throw new IllegalArgumentException("Unknown booking state for owner: " + state);
         }

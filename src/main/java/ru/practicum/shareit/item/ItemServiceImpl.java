@@ -16,10 +16,8 @@ import ru.practicum.shareit.user.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -92,13 +89,24 @@ public class ItemServiceImpl implements ItemService {
         // Загружаем комментарии для всех вещей одним запросом
         Map<Long, List<CommentDto>> commentsByItemId = getCommentsByItemIds(itemIds);
 
+        // Загружаем все бронирования для всех вещей владельца одним запросом
+        Map<Long, List<Booking>> bookingsByItemId = bookingRepository
+                .findByItemIdInAndStatusOrderByStartAsc(itemIds, BookingStatus.APPROVED)
+                .stream()
+                .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+
+        LocalDateTime now = LocalDateTime.now();
+
         return items.stream()
                 .map(item -> {
                     ItemDto itemDto = itemMapper.toItemDto(item);
 
                     // Добавляем информацию о бронированиях для владельца
-                    itemDto.setLastBooking(findLastBooking(item.getId()));
-                    itemDto.setNextBooking(findNextBooking(item.getId()));
+                    List<Booking> itemBookings = bookingsByItemId.getOrDefault(item.getId(), Collections.emptyList());
+                    if (!itemBookings.isEmpty()) {
+                        itemDto.setLastBooking(findLastBookingFromList(itemBookings, now));
+                        itemDto.setNextBooking(findNextBookingFromList(itemBookings, now));
+                    }
 
                     // Добавляем комментарии
                     itemDto.setComments(commentsByItemId.getOrDefault(item.getId(), Collections.emptyList()));
@@ -204,12 +212,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(booking -> booking.getStatus() == BookingStatus.APPROVED)
                 .findFirst();
 
-        return lastBooking.map(booking -> ItemDto.BookingInfoDto.builder()
-                .id(booking.getId())
-                .bookerId(booking.getBooker().getId())
-                .start(booking.getStart().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .end(booking.getEnd().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .build()).orElse(null);
+        return lastBooking.map(this::convertToBookingInfoDto).orElse(null);
     }
 
     /**
@@ -224,12 +227,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(booking -> booking.getStatus() == BookingStatus.APPROVED)
                 .findFirst();
 
-        return nextBooking.map(booking -> ItemDto.BookingInfoDto.builder()
-                .id(booking.getId())
-                .bookerId(booking.getBooker().getId())
-                .start(booking.getStart().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .end(booking.getEnd().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .build()).orElse(null);
+        return nextBooking.map(this::convertToBookingInfoDto).orElse(null);
     }
 
     /**
@@ -246,5 +244,47 @@ public class ItemServiceImpl implements ItemService {
                         comment -> comment.getItem().getId(),
                         Collectors.mapping(commentMapper::toCommentDto, Collectors.toList())
                 ));
+    }
+
+    /**
+     * Вспомогательный метод для поиска последнего бронирования из списка
+     */
+    private ItemDto.BookingInfoDto findLastBookingFromList(List<Booking> bookings, LocalDateTime now) {
+        return bookings.stream()
+                .filter(booking -> booking.getEnd().isBefore(now) ||
+                        (booking.getStart().isBefore(now) && booking.getEnd().isAfter(now)))
+                .max(Comparator.comparing(Booking::getEnd))
+                .map(this::convertToBookingInfoDto)
+                .orElse(null);
+    }
+
+    /**
+     * Вспомогательный метод для поиска следующего бронирования из списка
+     */
+    private ItemDto.BookingInfoDto findNextBookingFromList(List<Booking> bookings, LocalDateTime now) {
+        return bookings.stream()
+                .filter(booking -> booking.getStart().isAfter(now))
+                .min(Comparator.comparing(Booking::getStart))
+                .map(this::convertToBookingInfoDto)
+                .orElse(null);
+    }
+
+    /**
+     * Конвертирует Booking в BookingInfoDto
+     */
+    private ItemDto.BookingInfoDto convertToBookingInfoDto(Booking booking) {
+        return ItemDto.BookingInfoDto.builder()
+                .id(booking.getId())
+                .bookerId(booking.getBooker().getId())
+                .start(formatDateTime(booking.getStart()))
+                .end(formatDateTime(booking.getEnd()))
+                .build();
+    }
+
+    /**
+     * Форматирует LocalDateTime в строку ISO формата
+     */
+    private String formatDateTime(LocalDateTime dateTime) {
+        return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 }

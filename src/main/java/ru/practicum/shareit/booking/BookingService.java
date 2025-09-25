@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -10,7 +9,6 @@ import java.util.List;
 /**
  * Интерфейс сервиса для работы с бронированиями.
  */
-@Service
 public interface BookingService {
     /**
      * Создает новое бронирование.

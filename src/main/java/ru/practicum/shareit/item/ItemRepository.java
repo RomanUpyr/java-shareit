@@ -1,28 +1,16 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Интерфейс репозитория для работы с вещами.
  */
-public interface ItemRepository {
-    /**
-     * Сохраняет новую вещь
-     */
-    Item save(Item item);
-
-    /**
-     * Находит вещь по идентификатору
-     */
-    Optional<Item> findById(Long id);
-
-    /**
-     * Возвращает все вещи
-     */
-    List<Item> findAll();
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
     /**
      * Находит все вещи определенного владельца
@@ -39,15 +27,9 @@ public interface ItemRepository {
      * @param text текст для поиска
      * @return список подходящих вещей
      */
-    List<Item> search(String text);
+    @Query("SELECT i FROM Item i WHERE i.available = true AND " +
+            "(LOWER(i.name) LIKE LOWER(CONCAT('%', :text, '%')) OR " +
+            "LOWER(i.description) LIKE LOWER(CONCAT('%', :text, '%')))")
+    List<Item> search(@Param("text") String text);
 
-    /**
-     * Обновляет данные вещи
-     */
-    Item update(Item item);
-
-    /**
-     * Удаляет вещь по идентификатору
-     */
-    void deleteById(Long id);
 }

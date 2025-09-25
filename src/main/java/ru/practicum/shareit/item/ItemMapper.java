@@ -8,6 +8,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 
+import java.util.Collections;
+
 /**
  * Маппер для преобразования между Entity и DTO объектов вещи.
  * Обеспечивает согласованное преобразование данных между слоями.
@@ -25,13 +27,20 @@ public class ItemMapper {
      * @return ItemDto объект для передачи клиенту
      */
     public ItemDto toItemDto(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getRequest() != null ? item.getRequest().getId() : null
-        );
+        if (item == null) {
+            return null;
+        }
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .ownerId(item.getOwner() != null ? item.getOwner().getId() : null)
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
+                .lastBooking(null)
+                .nextBooking(null)
+                .comments(Collections.emptyList())
+                .build();
     }
 
     /**
@@ -42,22 +51,21 @@ public class ItemMapper {
      * @return Item Entity для сохранения
      */
     public Item toItem(ItemDto itemDto) {
-        Item item = new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                null,            // Владелец будет устанавливаться в сервисе на основе userId из заголовка
-                null                    // Запрос устанавливается ниже
-        );
+        Item.ItemBuilder itemBuilder = Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(null)
+                .request(null);
 
-        // Устанавливаем запрос, если указан requestId
         if (itemDto.getRequestId() != null) {
             ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
                     .orElseThrow(() -> new NotFoundException("Item request not found with id: " + itemDto.getRequestId()));
-            item.setRequest(itemRequest);
+            itemBuilder.request(itemRequest);
         }
 
-        return item;
+        return itemBuilder.build();
     }
+
 }

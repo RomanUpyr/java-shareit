@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
@@ -16,8 +17,8 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
-    // Внедрение зависимости репозитория через конструктор
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -25,8 +26,8 @@ public class UserServiceImpl implements UserService {
      * Создает пользователя, преобразуя DTO в Entity и обратно.
      */
     @Override
+    @Transactional
     public UserDto create(UserDto userDto) {
-        // Проверка уникальности email
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new ConflictException("Email already exists: " + userDto.getEmail());
         }
@@ -40,6 +41,7 @@ public class UserServiceImpl implements UserService {
      * Находит пользователя по id, выбрасывает исключение если не найден.
      */
     @Override
+    @Transactional(readOnly = true)
     public UserDto getById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
@@ -50,6 +52,7 @@ public class UserServiceImpl implements UserService {
      * Возвращает всех пользователей, преобразуя Entity в DTO.
      */
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toUserDto)
@@ -58,9 +61,9 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Частично обновляет пользователя.
-     * Обновляет только те поля, которые не null в DTO.
      */
     @Override
+    @Transactional
     public UserDto update(Long id, UserDto userDto) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
@@ -79,13 +82,14 @@ public class UserServiceImpl implements UserService {
             existingUser.setEmail(userDto.getEmail());
         }
 
-        return userMapper.toUserDto(userRepository.update(existingUser));
+        return userMapper.toUserDto(userRepository.save(existingUser));
     }
 
     /**
      * Удаляет пользователя по Id.
      */
     @Override
+    @Transactional
     public void delete(Long id) {
         userRepository.deleteById(id);
     }

@@ -1,14 +1,15 @@
 package ru.practicum.shareit.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 /**
  * Маппер для преобразования между Entity и DTO объектов пользователя.
- * Методы создадим статические, чтобы использовать маппер без создания экземпляра.
  */
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
     /**
      * Преобразует Entity пользователя в DTO для возврата клиенту.
@@ -17,6 +18,9 @@ public class UserMapper {
      * @return UserDto объект для передачи клиенту
      */
     public UserDto toUserDto(User user) {
+        if (user == null) {
+            return null;
+        }
         return new UserDto(
                 user.getId(),
                 user.getName(),

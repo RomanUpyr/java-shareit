@@ -3,10 +3,12 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.strategy.BookingStrategyContext;
+import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -33,6 +35,7 @@ public class BookingServiceImpl implements BookingService {
      * Создает бронирование с проверками:
      */
     @Override
+    @Transactional
     public BookingDto create(BookingDto bookingDto, Long bookerId) {
         // Проверяем существование пользователя
         userRepository.findById(bookerId)
@@ -49,12 +52,13 @@ public class BookingServiceImpl implements BookingService {
      * Подтверждает или отклоняет бронирование владельцем вещи
      */
     @Override
+    @Transactional
     public BookingDto approve(Long bookingId, Long ownerId, boolean approved) {
         Booking booking = getBookingById(bookingId);
 
         // Проверяем что пользователь является владельцем вещи
         if (!booking.getItem().getOwner().getId().equals(ownerId)) {
-            throw new NotFoundException("User is not the owner of the item");
+            throw new AccessDeniedException("User is not the owner of the item");
         }
 
         // Проверяем что бронирование еще не обработано
@@ -65,13 +69,14 @@ public class BookingServiceImpl implements BookingService {
         // Устанавливаем новый статус
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
 
-        return bookingMapper.toBookingDto(bookingRepository.update(booking));
+        return bookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
     /**
      * Находит бронирование с проверкой прав доступа
      */
     @Override
+    @Transactional(readOnly = true)
     public BookingDto getById(Long bookingId, Long userId) {
         Booking booking = getBookingById(bookingId);
 
@@ -96,6 +101,7 @@ public class BookingServiceImpl implements BookingService {
      * Возвращает бронирования пользователя с фильтрацией по состоянию
      */
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getByBookerId(Long bookerId, String state) {
         // Проверяем существование пользователя
         if (!userRepository.existsById(bookerId)) {
@@ -103,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // Используем контекст стратегий для получения бронирований
-        List<Booking> bookings = strategyContext.executeStrategy(state, bookerId, bookingRepository);
+        List<Booking> bookings = strategyContext.executeBookerStrategy(state, bookerId, bookingRepository);
 
         return bookings.stream()
                 .map(booking -> bookingMapper.toBookingDto(booking, true))
@@ -114,16 +120,17 @@ public class BookingServiceImpl implements BookingService {
      * Возвращает бронирования вещей владельца с фильтрацией по состоянию
      */
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getByOwnerId(Long ownerId, String state) {
         // Проверяем существование пользователя
         if (!userRepository.existsById(ownerId)) {
             throw new NotFoundException("User not found with id: " + ownerId);
         }
         // Используем контекст стратегий для получения бронирований
-        List<Booking> bookings = strategyContext.executeStrategy(state, ownerId, bookingRepository);
+        List<Booking> bookings = strategyContext.executeOwnerStrategy(state, ownerId, bookingRepository);
 
         return bookings.stream()
-                .map(bookingMapper::toBookingDto)
+                .map(booking -> bookingMapper.toBookingDto(booking, true))
                 .collect(Collectors.toList());
     }
 
@@ -161,7 +168,7 @@ public class BookingServiceImpl implements BookingService {
 
         validateBooking(existingBooking, userId);
 
-        return bookingMapper.toBookingDto(bookingRepository.update(existingBooking));
+        return bookingMapper.toBookingDto(bookingRepository.save(existingBooking));
     }
 
     /**
@@ -188,7 +195,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELED);
-        return bookingMapper.toBookingDto(bookingRepository.update(booking));
+        return bookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
     /**
@@ -227,8 +234,10 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // Проверяем доступность вещи в указанный период
-        if (!bookingRepository.isItemAvailableForBooking(
-                item.getId(), booking.getStart(), booking.getEnd(), booking.getId())) {
+        boolean hasOverlap = bookingRepository.existOverlappingBookings(
+                item.getId(), booking.getStart(), booking.getEnd(), booking.getId());
+
+        if (hasOverlap) {
             throw new ValidationException("Item is already booked for this period");
         }
     }

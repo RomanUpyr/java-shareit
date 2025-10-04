@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.strategy.BookingStateFetchStrategy;
 
 import java.util.List;
 
@@ -14,10 +13,10 @@ import java.util.List;
  */
 @Component
 @RequiredArgsConstructor
-public class WaitingOwnerStrategy implements BookingStateFetchStrategy {
+public class WaitingOwnerStrategy implements OwnerStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.WAITING);
+        return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
     }
 
     @Override

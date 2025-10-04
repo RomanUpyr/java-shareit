@@ -28,7 +28,7 @@ public class ItemRequestMapper {
         return new ItemRequestDto(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
-                itemRequest.getRequestorId(),
+                itemRequest.getRequestor(),
                 itemRequest.getCreated()
         );
     }
@@ -41,13 +41,13 @@ public class ItemRequestMapper {
      * @throws NotFoundException если пользователь не найден.
      */
     public ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
-        User requestor = userRepository.findById(itemRequestDto.getRequestorId())
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + itemRequestDto.getRequestorId()));
+        User requestor = userRepository.findById(itemRequestDto.getRequestor().getId())
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + itemRequestDto.getRequestor().getId()));
 
         return new ItemRequest(
                 itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
-                itemRequestDto.getRequestorId(),
+                requestor,
                 itemRequestDto.getCreated() != null ? itemRequestDto.getCreated() : LocalDateTime.now()
         );
     }

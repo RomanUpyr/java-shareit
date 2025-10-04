@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.strategy.BookingStateFetchStrategy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,10 +13,10 @@ import java.util.List;
  */
 @Component
 @RequiredArgsConstructor
-public class FutureBookerStrategy implements BookingStateFetchStrategy {
+public class FutureBookerStrategy implements BookerStrategy {
     @Override
     public List<Booking> findBookings(Long userId, BookingRepository bookingRepository) {
-        return bookingRepository.findFutureByBookerId(userId, LocalDateTime.now());
+        return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
     }
 
     @Override

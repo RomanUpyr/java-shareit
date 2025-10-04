@@ -3,16 +3,16 @@ package ru.practicum.shareit.request.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
 /**
  * DTO для передачи данных о запросе вещи.
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemRequestDto {
@@ -32,7 +32,7 @@ public class ItemRequestDto {
      * Пользователь, создавший запрос.
      */
     @NotNull(message = "ItemRequest requestor не должен быть null")
-    private Long requestorId;
+    private User requestor;
 
     /**
      * Дата и время создания запроса.

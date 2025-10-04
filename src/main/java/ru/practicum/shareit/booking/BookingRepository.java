@@ -1,5 +1,8 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 
@@ -10,84 +13,110 @@ import java.util.Optional;
 /**
  * Интерфейс репозитория для работы с бронированиями.
  */
-public interface BookingRepository {
-    /**
-     * Сохраняет новое бронирование.
-     */
-    Booking save(Booking booking);
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     /**
-     * Находит бронирование по идентификатору.
+     * Находит все бронирования определенного пользователя, отсортированные по дате начала.
      */
-    Optional<Booking> findById(Long id);
+    List<Booking> findByBookerIdOrderByStartDesc(Long bookerId);
 
     /**
-     * Возвращает все бронирования.
+     * Находит бронирования пользователя с определенным статусом, отсортированные по дате начала.
      */
-    List<Booking> findAll();
-
-    /**
-     * Находит все бронирования определенного пользователя.
-     */
-    List<Booking> findByBookerId(Long bookerId);
-
-    /**
-     * Находит все бронирования вещей определенного владельца.
-     */
-    List<Booking> findByOwnerId(Long ownerId);
-
-    /**
-     * Находит все бронирования с определенным статусом для пользователя.
-     */
-    List<Booking> findByBookerIdAndStatus(Long bookerId, BookingStatus status);
-
-    /**
-     * Находит все бронирования с определенным статусом для владельца.
-     */
-    List<Booking> findByOwnerIdAndStatus(Long ownerId, BookingStatus status);
+    List<Booking> findByBookerIdAndStatusOrderByStartDesc(Long bookerId, BookingStatus status);
 
     /**
      * Находит текущие бронирования пользователя.
      */
-    List<Booking> findCurrentByBookerId(Long bookerId, LocalDateTime now);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.booker.id = :bookerId AND b.start <= :start AND b.end >= :start ORDER BY b.start DESC")
+    List<Booking> findByBookerIdAndStartBeforeOrderByStartDesc(
+            @Param("bookerId") Long bookerId, @Param("start") LocalDateTime start);
 
     /**
-     * Находит текущие бронирования владельца.
+     * Находит завершенные бронирования пользователя.
      */
-    List<Booking> findCurrentByOwnerId(Long ownerId, LocalDateTime now);
+    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(Long bookerId, LocalDateTime end);
 
     /**
      * Находит будущие бронирования пользователя.
      */
-    List<Booking> findFutureByBookerId(Long bookerId, LocalDateTime now);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.booker.id = :bookerId AND b.start >= :start ORDER BY b.start DESC")
+    List<Booking> findByBookerIdAndStartAfterOrderByStartDesc(@Param("bookerId") Long bookerId, @Param("start") LocalDateTime start);
 
     /**
-     * Находит будущие бронирования владельца.
+     * Находит все бронирования вещей владельца, отсортированные по дате начала.
      */
-    List<Booking> findFutureByOwnerId(Long ownerId, LocalDateTime now);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.owner.id = :ownerId ORDER BY b.start DESC")
+    List<Booking> findByItemOwnerIdOrderByStartDesc(@Param("ownerId") Long ownerId);
 
     /**
-     * Находит прошедшие бронирования пользователя.
+     * Находит бронирования вещей владельца с определенным статусом.
      */
-    List<Booking> findPastByBookerId(Long bookerId, LocalDateTime now);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.owner.id = :ownerId AND b.status = :status ORDER BY b.start DESC")
+    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(@Param("ownerId") Long ownerId, @Param("status") BookingStatus status);
 
     /**
-     * Находит прошедшие бронирования владельца.
+     * Находит текущие бронирования вещей владельца.
      */
-    List<Booking> findPastByOwnerId(Long ownerId, LocalDateTime now);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.owner.id = :ownerId AND b.start <= :start AND b.end >= :start ORDER BY b.start DESC")
+    List<Booking> findByItemOwnerIdAndStartBeforeOrderByStartDesc(
+            @Param("ownerId") Long ownerId, @Param("start") LocalDateTime start);
 
     /**
-     * Обновляет данные бронирования.
+     * Находит завершенные бронирования вещей владельца.
      */
-    Booking update(Booking booking);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.owner.id = :ownerId AND b.end <= :end ORDER BY b.start DESC")
+    List<Booking> findByItemOwnerIdAndEndBeforeOrderByStartDesc(@Param("ownerId") Long ownerId, @Param("end") LocalDateTime end);
 
     /**
-     * Удаляет бронирование по идентификатору.
+     * Находит будущие бронирования вещей владельца.
      */
-    void deleteById(Long id);
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.owner.id = :ownerId AND b.start >= :start ORDER BY b.start DESC")
+    List<Booking> findByItemOwnerIdAndStartAfterOrderByStartDesc(@Param("ownerId") Long ownerId, @Param("start") LocalDateTime start);
 
     /**
-     * Проверяет, доступна ли вещь для бронирования в указанный период.
+     * Находит пересекающиеся бронирования для указанной вещи.
+     * Используется для проверки доступности вещи в заданный период.
      */
-    boolean isItemAvailableForBooking(Long itemId, LocalDateTime start, LocalDateTime end, Long excludeBookingId);
+    @Query("SELECT CASE WHEN COUNT(b) > 0 THEN TRUE ELSE FALSE END FROM Booking b WHERE " +
+            "b.item.id = :itemId AND b.status = 'APPROVED' " +
+            "AND (:excludeBookingId IS NULL OR b.id <> :excludeBookingId) " +
+            "AND ((b.start BETWEEN :start AND :end) OR (b.end BETWEEN :start AND :end) " +
+            "OR (b.start <= :start AND b.end >= :end))")
+    boolean existOverlappingBookings(@Param("itemId") Long itemId,
+                                     @Param("start") LocalDateTime start,
+                                     @Param("end") LocalDateTime end,
+                                     @Param("excludeBookingId") Long excludeBookingId);
+
+    /**
+     * Находит последнее завершенное бронирование вещи пользователем.
+     * Используется для проверки возможности оставить отзыв.
+     */
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.booker.id = :bookerId AND b.status = :status AND b.end <= :end ORDER BY b.end DESC")
+    Optional<Booking> findFirstByItemIdAndBookerIdAndStatusAndEndBefore(
+            @Param("itemId") Long itemId, @Param("bookerId") Long bookerId, @Param("status") BookingStatus status, @Param("end") LocalDateTime end);
+
+    /**
+     * Находит завершенные бронирования вещи, отсортированные по дате окончания (от новых к старым).
+     */
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.end < :currentTime AND b.status = 'APPROVED' ORDER BY b.end DESC")
+    List<Booking> findCompletedBookingsByItemId(@Param("itemId") Long itemId, @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Находит будущие бронирования вещи, отсортированные по дате начала (от ближайших к дальним).
+     */
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item JOIN FETCH b.booker WHERE b.item.id = :itemId AND b.start > :currentTime AND b.status = 'APPROVED' ORDER BY b.start ASC")
+    List<Booking> findFutureBookingsByItemId(@Param("itemId") Long itemId, @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Находит текущие бронирования вещи.
+     */
+    @Query("SELECT b FROM Booking b WHERE b.item.id IN :itemIds AND b.end < :currentTime " +
+            "AND b.status = 'APPROVED' ORDER BY b.end DESC")
+    List<Booking> findCurrentBookingsByItemId(@Param("itemId") Long itemId, @Param("currentTime") LocalDateTime currentTime);
+
+
+    List<Booking> findByItemIdInAndStatusOrderByStartAsc(List<Long> itemIds, BookingStatus status);
+
+
 }

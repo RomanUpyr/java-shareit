@@ -23,6 +23,11 @@
         <maven.compiler.release>21</maven.compiler.release>
     </properties>
 
+    <modules>
+        <module>gateway</module>
+        <module>server</module>
+    </modules>
+    <!--
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -74,7 +79,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+    -->
     <build>
         <resources>
             <resource>

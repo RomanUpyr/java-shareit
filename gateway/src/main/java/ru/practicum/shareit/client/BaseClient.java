@@ -12,7 +12,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public abstract class BaseClient {
-    protected final WebClient webClient;
+    public final WebClient webClient;
 
     public BaseClient(WebClient webClient) {
         this.webClient = webClient;

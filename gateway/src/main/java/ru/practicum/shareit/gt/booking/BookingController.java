@@ -27,7 +27,7 @@ public class BookingController {
      * Создает новое бронирование с валидацией группы Create
      */
     @PostMapping
-    public ResponseEntity<Object> create(@Validated(BookingDto.Create.class) @RequestBody BookingDto bookingDto,
+    public ResponseEntity<BookingDto> create(@Validated(BookingDto.Create.class) @RequestBody BookingDto bookingDto,
                                          @RequestHeader(USER_ID_HEADER) Long bookerId) {
         return bookingClient.create(bookingDto, bookerId);
     }
@@ -36,7 +36,7 @@ public class BookingController {
      * Подтверждает или отклоняет бронирование
      */
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<Object> approve(@PathVariable Long bookingId,
+    public ResponseEntity<BookingDto> approve(@PathVariable Long bookingId,
                                           @RequestHeader(USER_ID_HEADER) Long ownerId,
                                           @RequestParam boolean approved) {
         return bookingClient.approve(bookingId, ownerId, approved);
@@ -46,7 +46,7 @@ public class BookingController {
      * Возвращает информацию о бронировании
      */
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object> getById(@PathVariable Long bookingId,
+    public ResponseEntity<BookingDto> getById(@PathVariable Long bookingId,
                                           @RequestHeader(USER_ID_HEADER) Long userId) {
         return bookingClient.getById(bookingId, userId);
     }
@@ -55,7 +55,7 @@ public class BookingController {
      * Возвращает бронирования пользователя с фильтрацией по состоянию
      */
     @GetMapping
-    public ResponseEntity<Object> getByBookerId(@RequestHeader(USER_ID_HEADER) Long bookerId,
+    public ResponseEntity<BookingDto> getByBookerId(@RequestHeader(USER_ID_HEADER) Long bookerId,
                                                 @RequestParam(defaultValue = "ALL") String state) {
         return bookingClient.getByBookerId(bookerId, state);
     }
@@ -64,7 +64,7 @@ public class BookingController {
      * Возвращает бронирования вещей владельца с фильтрацией по состоянию
      */
     @GetMapping("/owner")
-    public ResponseEntity<Object> getByOwnerId(@RequestHeader(USER_ID_HEADER) Long ownerId,
+    public ResponseEntity<BookingDto> getByOwnerId(@RequestHeader(USER_ID_HEADER) Long ownerId,
                                                @RequestParam(defaultValue = "ALL") String state) {
         return bookingClient.getByOwnerId(ownerId, state);
     }
@@ -73,7 +73,7 @@ public class BookingController {
      * Обновляет бронирование
      */
     @PutMapping("/{bookingId}")
-    public ResponseEntity<Object> update(@PathVariable Long bookingId,
+    public ResponseEntity<BookingDto> update(@PathVariable Long bookingId,
                                          @Validated(BookingDto.Update.class) @RequestBody BookingDto bookingDto,
                                          @RequestHeader(USER_ID_HEADER) Long userId) {
         return bookingClient.update(bookingId, bookingDto, userId);
@@ -83,7 +83,7 @@ public class BookingController {
      * Отменяет бронирование
      */
     @DeleteMapping("/{bookingId}")
-    public ResponseEntity<Object> cancel(@PathVariable Long bookingId,
+    public ResponseEntity<BookingDto> cancel(@PathVariable Long bookingId,
                                          @RequestHeader(USER_ID_HEADER) Long userId) {
         return bookingClient.cancel(bookingId, userId);
     }

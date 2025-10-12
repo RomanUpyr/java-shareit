@@ -23,7 +23,7 @@ public class UserController {
      * @return созданный пользователь.
      */
     @PostMapping
-    public ResponseEntity<Object> create(@Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto userDto) {
         return userClient.create(userDto);
     }
 
@@ -35,7 +35,7 @@ public class UserController {
      * @return пользователь.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getById(@PathVariable Long id) {
+    public ResponseEntity<UserDto> getById(@PathVariable Long id) {
         return userClient.getById(id);
     }
 
@@ -45,7 +45,7 @@ public class UserController {
      * @return список всех пользователей.
      */
     @GetMapping
-    public ResponseEntity<Object> getAll() {
+    public ResponseEntity<UserDto> getAll() {
         return userClient.getAll();
     }
 
@@ -57,7 +57,7 @@ public class UserController {
      * @return обновленный пользователь.
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> update(@Valid @PathVariable Long id, @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> update(@Valid @PathVariable Long id, @RequestBody UserDto userDto) {
         return userClient.update(id, userDto);
     }
 
@@ -67,7 +67,7 @@ public class UserController {
      * @param id идентификатор пользователя для удаления.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable Long id) {
+    public ResponseEntity<UserDto> delete(@PathVariable Long id) {
         return userClient.delete(id);
     }
 

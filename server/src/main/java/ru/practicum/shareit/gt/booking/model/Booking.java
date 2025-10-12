@@ -1,8 +1,6 @@
 package ru.practicum.shareit.gt.booking.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import ru.practicum.shareit.gt.booking.dto.BookingStatus;
@@ -35,7 +33,6 @@ public class Booking {
      */
     @Column(name = "start_date", nullable = false)
     @NotNull(message = "Дата начала бронирования не может быть null")
-    @FutureOrPresent(message = "Дата начала бронирования должна быть в будущем или настоящем")
     private LocalDateTime start;
 
     /**
@@ -43,7 +40,6 @@ public class Booking {
      */
     @Column(name = "end_date", nullable = false)
     @NotNull(message = "Дата окончания бронирования не может быть null")
-    @Future(message = "Дата окончания бронирования должна быть в будущем")
     private LocalDateTime end;
 
     /**

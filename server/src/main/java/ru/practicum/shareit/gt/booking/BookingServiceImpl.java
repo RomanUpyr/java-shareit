@@ -221,6 +221,7 @@ public class BookingServiceImpl implements BookingService {
      */
     private void validateBooking(Booking booking, Long bookerId) {
         Item item = booking.getItem();
+        LocalDateTime now = LocalDateTime.now();
 
         // Владелец не может бронировать свою вещь
         if (item.getOwner().getId().equals(bookerId)) {
@@ -237,9 +238,9 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Start date must be before end date");
         }
 
-        // Дата начала не должна быть в прошлом
-        if (booking.getStart().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Start date cannot be in past");
+        // Дата начала не должна быть в будущем
+        if (booking.getEnd().isBefore(now)) {
+            throw new ValidationException("End date must be in future");
         }
 
         // Проверяем доступность вещи в указанный период

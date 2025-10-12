@@ -2,6 +2,7 @@ package ru.practicum.shareit;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.time.Duration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @Testcontainers
 public abstract class AbstractIntegrationTest {
 

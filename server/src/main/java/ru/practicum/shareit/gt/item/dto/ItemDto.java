@@ -1,8 +1,6 @@
 package ru.practicum.shareit.gt.item.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -26,21 +24,18 @@ public class ItemDto {
     /**
      * Краткое название вещи.
      */
-    @NotBlank(message = "Item name не должен быть пустым")
     @JsonProperty("name")
     private String name;
 
     /**
      * Подробное описание вещи и её характеристик.
      */
-    @NotBlank(message = "Item description не должен быть пустым")
     @JsonProperty("description")
     private String description;
 
     /**
      * Статус доступности вещи для аренды (устанавливается владельцем вещи).
      */
-    @NotNull(message = "Item available не должен быть null")
     @JsonProperty("available")
     private Boolean available;
 

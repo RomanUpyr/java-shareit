@@ -10,39 +10,45 @@ import ru.practicum.shareit.gt.item.dto.CommentDto;
 import java.util.Map;
 
 @Service
-public class ItemClient extends BaseClient {
+public class ItemClient extends BaseClient<ItemDto> {
     private static final String API_PREFIX = "/items";
 
     public ItemClient(WebClient webClient) {
-        super(webClient);
+        super(webClient, ItemDto.class);
     }
 
-    public ResponseEntity<Object> create(ItemDto itemDto, Long ownerId) {
+    public ResponseEntity<ItemDto> create(ItemDto itemDto, Long ownerId) {
         return post(API_PREFIX , ownerId, itemDto);
     }
 
-    public ResponseEntity<Object> getById(Long id, Long userId) {
+    public ResponseEntity<ItemDto> getById(Long id, Long userId) {
         return get(API_PREFIX + "/" + id, userId);
     }
 
-    public ResponseEntity<Object> getByOwnerId(Long ownerId) {
+    public ResponseEntity<ItemDto> getByOwnerId(Long ownerId) {
         return get(API_PREFIX , ownerId);
     }
 
-    public ResponseEntity<Object> update(Long id, ItemDto itemDto, Long ownerId) {
+    public ResponseEntity<ItemDto> update(Long id, ItemDto itemDto, Long ownerId) {
         return patch(API_PREFIX + "/" + id, ownerId, itemDto);
     }
 
-    public ResponseEntity<Object> delete(Long id) {
+    public ResponseEntity<ItemDto> delete(Long id) {
         return delete(API_PREFIX + "/" + id);
     }
 
-    public ResponseEntity<Object> search(String text) {
+    public ResponseEntity<ItemDto> search(String text) {
         Map<String, Object> parameters = Map.of("text", text);
         return get(API_PREFIX + "/search", null, parameters);
     }
 
-    public ResponseEntity<Object> addComment(Long itemId, CommentDto commentDto, Long userId) {
-        return post(API_PREFIX + "/" + itemId + "/comment", userId, commentDto);
+    public ResponseEntity<CommentDto> addComment(Long itemId, CommentDto commentDto, Long userId) {
+        return webClient.post()
+                .uri(API_PREFIX + "/" + itemId + "/comment")
+                .header("X-Sharer-User-Id", String.valueOf(userId))
+                .bodyValue(commentDto)
+                .retrieve()
+                .toEntity(CommentDto.class)
+                .block();
     }
 }

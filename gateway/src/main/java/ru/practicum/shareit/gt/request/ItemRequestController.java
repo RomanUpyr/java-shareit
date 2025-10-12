@@ -29,7 +29,7 @@ public class ItemRequestController {
      * @return созданный запрос.
      */
     @PostMapping
-    public ResponseEntity<Object> create(@Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto,
+    public ResponseEntity<ItemRequestDto> create(@Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto,
                                          @RequestHeader(USER_ID_HEADER) Long userId) {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setDescription(itemRequestCreateDto.getDescription());
@@ -44,7 +44,7 @@ public class ItemRequestController {
      * @return список запросов пользователя.
      */
     @GetMapping
-    public ResponseEntity<Object> getByRequestorId(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public ResponseEntity<ItemRequestDto> getByRequestorId(@RequestHeader(USER_ID_HEADER) Long userId) {
         return itemRequestClient.getByUserId(userId);
     }
 
@@ -56,7 +56,7 @@ public class ItemRequestController {
      * @return список запросов других пользователей.
      */
     @GetMapping("/all")
-    public ResponseEntity<Object> getAllExceptUser(
+    public ResponseEntity<ItemRequestDto> getAllExceptUser(
             @RequestHeader(USER_ID_HEADER) Long userId,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
@@ -70,7 +70,7 @@ public class ItemRequestController {
      * @return запрос.
      */
     @GetMapping("/{requestId}")
-    public ResponseEntity<Object> getById(@PathVariable Long requestId) {
+    public ResponseEntity<ItemRequestDto> getById(@PathVariable Long requestId) {
         return itemRequestClient.getById(requestId);
     }
 
@@ -82,7 +82,7 @@ public class ItemRequestController {
      * @return обновленный запрос
      */
     @PatchMapping("/{requestId}")
-    public ResponseEntity<Object> update(@Valid @PathVariable Long requestId,
+    public ResponseEntity<ItemRequestDto> update(@Valid @PathVariable Long requestId,
                                          @RequestBody ItemRequestDto itemRequestDto) {
         return itemRequestClient.update(requestId, itemRequestDto);
     }
@@ -93,7 +93,7 @@ public class ItemRequestController {
      * @param requestId идентификатор запроса для удаления.
      */
     @DeleteMapping("/{requestId}")
-    public ResponseEntity<Object> delete(@PathVariable Long requestId) {
+    public ResponseEntity<ItemRequestDto> delete(@PathVariable Long requestId) {
         return itemRequestClient.delete(requestId);
     }
 }

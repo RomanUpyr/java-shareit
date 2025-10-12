@@ -2,7 +2,6 @@ package ru.practicum.shareit.gt.item.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,7 +25,6 @@ public class CommentDto {
     /**
      * Текст комментария.
      */
-    @NotBlank(message = "Текст комментария не может быть пустым")
     @JsonProperty("text")
     private String text;
 

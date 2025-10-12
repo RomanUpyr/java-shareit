@@ -4,26 +4,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.shareit.gt.request.dto.ItemRequestCreateDto;
+import ru.practicum.shareit.gt.request.dto.ItemRequestDto;
 
 import java.util.Map;
 
 @Service
-public class ItemRequestClient extends BaseClient {
+public class ItemRequestClient extends BaseClient<ItemRequestDto> {
     private static final String API_PREFIX = "/requests";
 
     public ItemRequestClient(WebClient webClient) {
-        super(webClient);
+        super(webClient, ItemRequestDto.class);
     }
 
-    public ResponseEntity<Object> create(ItemRequestCreateDto itemRequestCreateDto, Long userId) {
-        return post(API_PREFIX , userId, itemRequestCreateDto);
+    public ResponseEntity<ItemRequestDto> create(ItemRequestCreateDto itemRequestCreateDto, Long userId) {
+        return webClient.post()
+                .uri(API_PREFIX)
+                .header("X-Sharer-User-Id", String.valueOf(userId))
+                .bodyValue(itemRequestCreateDto)
+                .retrieve()
+                .toEntity(ItemRequestDto.class)
+                .block();
     }
 
-    public ResponseEntity<Object> getByUserId(Long userId) {
+    public ResponseEntity<ItemRequestDto> getByUserId(Long userId) {
         return get(API_PREFIX , userId);
     }
 
-    public ResponseEntity<Object> getAllExceptUser(Long userId, int from, int size) {
+    public ResponseEntity<ItemRequestDto> getAllExceptUser(Long userId, int from, int size) {
         Map<String, Object> parameters = Map.of(
                 "from", from,
                 "size", size
@@ -31,15 +38,15 @@ public class ItemRequestClient extends BaseClient {
         return get(API_PREFIX + "/all", userId, parameters);
     }
 
-    public ResponseEntity<Object> getById(Long requestId) {
+    public ResponseEntity<ItemRequestDto> getById(Long requestId) {
         return get(API_PREFIX + "/" + requestId);
     }
 
-    public ResponseEntity<Object> update(Long requestId, Object itemRequestDto) {
+    public ResponseEntity<ItemRequestDto> update(Long requestId, ItemRequestDto itemRequestDto) {
         return patch(API_PREFIX + "/" + requestId, null, itemRequestDto);
     }
 
-    public ResponseEntity<Object> delete(Long requestId) {
+    public ResponseEntity<ItemRequestDto> delete(Long requestId) {
         return delete(API_PREFIX + "/" + requestId);
     }
 }

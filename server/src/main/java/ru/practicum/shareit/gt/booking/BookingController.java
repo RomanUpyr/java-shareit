@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.gt.booking.dto.BookingDto;
-import ru.practicum.shareit.gt.exception.ValidationException;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * REST контроллер для работы с бронированиями.

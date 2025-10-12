@@ -32,7 +32,7 @@ public class ItemController {
      * @return созданная вещь
      */
     @PostMapping
-    public ResponseEntity<Object> create(@Valid @RequestBody ItemDto itemDto,
+    public ResponseEntity<ItemDto> create(@Valid @RequestBody ItemDto itemDto,
                                          @RequestHeader(USER_ID_HEADER) Long ownerId) {
         return itemClient.create(itemDto, ownerId);
     }
@@ -44,7 +44,7 @@ public class ItemController {
      * @return вещь.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getById(@PathVariable Long id,
+    public ResponseEntity<ItemDto> getById(@PathVariable Long id,
                                           @RequestHeader(USER_ID_HEADER) Long userId) {
         return itemClient.getById(id, userId);
     }
@@ -56,7 +56,7 @@ public class ItemController {
      * @return список вещей владельца.
      */
     @GetMapping
-    public ResponseEntity<Object> getByOwnerId(@RequestHeader(USER_ID_HEADER) Long ownerId) {
+    public ResponseEntity<ItemDto> getByOwnerId(@RequestHeader(USER_ID_HEADER) Long ownerId) {
         return itemClient.getByOwnerId(ownerId);
     }
 
@@ -69,7 +69,7 @@ public class ItemController {
      * @return обновленная вещь.
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> update(@Valid @PathVariable Long id,
+    public ResponseEntity<ItemDto> update(@Valid @PathVariable Long id,
                                          @RequestBody ItemDto itemDto,
                                          @RequestHeader(USER_ID_HEADER) Long ownerId) {
         return itemClient.update(id, itemDto, ownerId);
@@ -81,7 +81,7 @@ public class ItemController {
      * @param id идентификатор вещи для удаления
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable Long id) {
+    public ResponseEntity<ItemDto> delete(@PathVariable Long id) {
         return itemClient.delete(id);
     }
 
@@ -92,7 +92,7 @@ public class ItemController {
      * @return список подходящих вещей
      */
     @GetMapping("/search")
-    public ResponseEntity<Object> search(@RequestParam String text) {
+    public ResponseEntity<ItemDto> search(@RequestParam String text) {
         return itemClient.search(text);
     }
 
@@ -100,7 +100,7 @@ public class ItemController {
      * Добавляет комментарий к вещи.
      */
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> addComment(@PathVariable Long itemId,
+    public ResponseEntity<CommentDto> addComment(@PathVariable Long itemId,
                                              @Validated @RequestBody CommentDto commentDto,
                                              @RequestHeader(USER_ID_HEADER) Long userId) {
         return itemClient.addComment(itemId, commentDto, userId);

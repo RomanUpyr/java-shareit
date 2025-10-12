@@ -11,47 +11,49 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public abstract class BaseClient {
+public abstract class BaseClient<T> {
     public final WebClient webClient;
+    private final Class<T> responseType;
 
-    public BaseClient(WebClient webClient) {
+    public BaseClient(WebClient webClient, Class<T> responseType) {
         this.webClient = webClient;
+        this.responseType = responseType;
     }
 
-    protected ResponseEntity<Object> get(String path) {
+    protected ResponseEntity<T> get(String path) {
         return get(path, null, null);
     }
 
-    protected ResponseEntity<Object> get(String path, Long userId) {
+    protected ResponseEntity<T> get(String path, Long userId) {
         return get(path, userId, null);
     }
 
-    protected ResponseEntity<Object> get(String path, Long userId, Map<String, Object> parameters) {
+    protected ResponseEntity<T> get(String path, Long userId, Map<String, Object> parameters) {
         return makeRequest(HttpMethod.GET, path, userId, null, parameters);
     }
 
-    protected <T> ResponseEntity<Object> post(String path, T body) {
+    protected <B> ResponseEntity<T> post(String path, T body) {
         return post(path, null, body);
     }
 
-    protected <T> ResponseEntity<Object> post(String path, Long userId, T body) {
+    protected <B> ResponseEntity<T> post(String path, Long userId, T body) {
         return makeRequest(HttpMethod.POST, path, userId, body, null);
     }
 
-    protected <T> ResponseEntity<Object> put(String path, Long userId, T body) {
+    protected <B> ResponseEntity<T> put(String path, Long userId, T body) {
         return makeRequest(HttpMethod.PUT, path, userId, body, null);
     }
 
-    protected ResponseEntity<Object> patch(String path, Long userId, Object body) {
+    protected ResponseEntity<T> patch(String path, Long userId, T body) {
         return patch(path, userId, body, null);
     }
 
-    protected ResponseEntity<Object> patch(String path, Long userId, Map<String, Object> parameters) {
+    protected ResponseEntity<T> patch(String path, Long userId, Map<String, Object> parameters) {
         return patch(path, userId, null, parameters);
     }
 
-    protected ResponseEntity<Object> patch(String path, Long userId, Object body, Map<String, Object> parameters) {
-        return webClient.method(HttpMethod.PATCH)
+    protected ResponseEntity<T> patch(String path, Long userId, T body, Map<String, Object> parameters) {
+        return (ResponseEntity<T>) webClient.method(HttpMethod.PATCH)
                 .uri(uriBuilder -> {
                     UriBuilder uriBuilderInstance = uriBuilder.path(path);
                     if (parameters != null) {
@@ -66,17 +68,17 @@ public abstract class BaseClient {
                 .block();
     }
 
-    protected ResponseEntity<Object> delete(String path, Long userId) {
+    protected ResponseEntity<T> delete(String path, Long userId) {
         return makeRequest(HttpMethod.DELETE, path, userId, null, null);
     }
 
-    protected ResponseEntity<Object> delete(String path) {
+    protected ResponseEntity<T> delete(String path) {
         return delete(path, null);
     }
 
-    private <T> ResponseEntity<Object> makeRequest(HttpMethod method, String path, Long userId, T body, Map<String, Object> parameters) {
+    private <B> ResponseEntity<T> makeRequest(HttpMethod method, String path, Long userId, T body, Map<String, Object> parameters) {
         try {
-            return webClient.method(method)
+            return (ResponseEntity<T>) webClient.method(method)
                     .uri(uriBuilder -> {
                         UriBuilder uriBuilderInstance = uriBuilder.path(path);
                         if (parameters != null) {
@@ -90,7 +92,7 @@ public abstract class BaseClient {
                     .toEntity(Object.class)
                     .block();
         } catch (WebClientResponseException e) {
-            return ResponseEntity.status(e.getStatusCode())
+            return (ResponseEntity<T>) ResponseEntity.status(e.getStatusCode())
                     .body(e.getResponseBodyAs(String.class));
         }
     }
